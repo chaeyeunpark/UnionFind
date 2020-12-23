@@ -1,5 +1,6 @@
 # UnionFind
-C++ implementation of Union-Find decoder [arXiv:1709:06218](https://arxiv.org/abs/1709.06218) and Python interface with [pybind11](https://github.com/pybind/pybind11). 
+C++ implementation of Union-Find decoder [arXiv:1709:06218](https://arxiv.org/abs/1709.06218). 
+Python interface is also available thanks to [pybind11](https://github.com/pybind/pybind11). 
 
 Based on Python implemtation by Kai Meinerz.
 
