@@ -16,4 +16,19 @@ Especially, our greedy algorithm does not introduce any additional hash set/map 
 In addition, even though the worst-time complexity of our greedy algorithm is not linear, we have not observed this part slows down the decoding from our profiling results. More than 90% of time is taken by the main Union-Find algorithm regardless of the lattice size and error rates.
 
 # Usage
-to be added..
+You can compile the code like this
+```bash
+mkdir build && cd build
+cmake ..
+make union_find
+```
+After that, you can see `union_find.cpython-[some extra string].so` file in your `build` directory. Copy this file into your python code directory. Then you can use it as below
+```python
+from union_find import UnionFindDecoder
+decoder = UnionFindDecoder(lattice_size) # L = lattice_size
+decoder.decode(syndromes) # syndromes is a list of size L^2
+decoder.clear() # should be called for reuse
+```
+
+# Notes
+This repository does not contain an implementation of weighted Union-Find decoder. 
