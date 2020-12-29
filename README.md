@@ -23,14 +23,14 @@ cd UnionFind
 git submodule update --init --recursive
 ```
 
-You can compile the code as below.
+and compile the code.
 ```bash
 mkdir build && cd build
 cmake ..
 make union_find
 ```
 
-After that, you can see `union_find.cpython-[some extra string].so` file in your `build` directory. Copy this file into your python code directory. Then you can use it as below
+After that, you can see `union_find.cpython-[some extra string].so` file in your `build` directory. Copy this file into your python code directory. Then you can use it.
 ```python
 from union_find import UnionFindDecoder
 decoder = UnionFindDecoder(lattice_size) # L = lattice_size
