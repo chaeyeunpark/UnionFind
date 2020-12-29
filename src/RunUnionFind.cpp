@@ -54,6 +54,8 @@ int main(int argc, char* argv[])
 
 		auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
 		auto synd_z = errors_to_syndromes(L, z_errors, ErrorType::Z);
+
+
 		auto start = chrono::high_resolution_clock::now();
 		decoder.clear();
 		auto decoding_x = decoder.decode(synd_x);
@@ -63,6 +65,7 @@ int main(int argc, char* argv[])
 
 		add_corrections(L, decoding_x, x_errors, ErrorType::X);
 		add_corrections(L, decoding_z, z_errors, ErrorType::Z);
+
 
 		if((!logical_error(L, x_errors, ErrorType::X)) && !(logical_error(L, z_errors, ErrorType::Z)))
 		{

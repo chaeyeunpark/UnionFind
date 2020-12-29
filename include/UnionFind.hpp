@@ -124,18 +124,19 @@ private:
 		return root;
 	}
 
-	void update_boundary(Vertex root)
+	void merge_boundary(Vertex root1, Vertex root2)
 	{
- 		auto it = begin(border_vertices_[root]);
-		while(it != end(border_vertices_[root]))
+		border_vertices_[root1].insert(
+			border_vertices_[root2].cbegin(), border_vertices_[root2].cend());
+		
+		for(auto vertex: border_vertices_[root2])
 		{
-			if(connection_counts_[*it] == 4)
+			if(connection_counts_[vertex] == 4)
 			{
-				it = border_vertices_[root].erase(it);
+				border_vertices_[root1].erase(vertex);
 			}
-			else
-				++it;
 		}
+		border_vertices_.erase(root2);
 	}
 
 	void fusion()
@@ -169,12 +170,7 @@ private:
 			else
 			{
 				mgr_.merge(root1, root2);
-				update_boundary(root2);
-
-				border_vertices_[root1].insert(
-						border_vertices_[root2].cbegin(), border_vertices_[root2].cend());
-
-				border_vertices_.erase(root2);
+				merge_boundary(root1, root2);
 			}
 
 		}
