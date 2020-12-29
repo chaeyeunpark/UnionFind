@@ -16,12 +16,20 @@ Especially, our greedy algorithm does not introduce any additional hash set/map 
 In addition, even though the worst-time complexity of our greedy algorithm is not linear, we have not observed this part slows down the decoding from our profiling results. More than 90% of time is taken by the main Union-Find algorithm regardless of the lattice size and error rates.
 
 # Usage
-You can compile the code like this
+First, set up the source tree.
+```bash
+git clone https://github.com/chaeyeunpark/UnionFind.git
+cd UnionFind
+git submodule update --init --recursive
+```
+
+You can compile the code as below.
 ```bash
 mkdir build && cd build
 cmake ..
 make union_find
 ```
+
 After that, you can see `union_find.cpython-[some extra string].so` file in your `build` directory. Copy this file into your python code directory. Then you can use it as below
 ```python
 from union_find import UnionFindDecoder
