@@ -16,7 +16,7 @@ Especially, our greedy algorithm does not introduce any additional hash set/map 
 In addition, even though the worst-time complexity of our greedy algorithm is not linear, we have not observed this part slows down overall decoding time from our profiling results. More than 90% of time is taken by the main Union-Find algorithm regardless of the lattice size and error rates.
 
 # Usage
-First, set up the source tree.
+First, set up the source tree
 ```bash
 git clone https://github.com/chaeyeunpark/UnionFind.git
 cd UnionFind
