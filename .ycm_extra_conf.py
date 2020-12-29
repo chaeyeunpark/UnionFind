@@ -63,7 +63,8 @@ flags = [
 '-I/home/cecri/intel/tbb/include/',
 '-I{}'.format(os.path.join(dir_path, 'include')),
 '-I{}'.format(os.path.join(dir_path, 'externals')),
-'-I{}'.format(os.path.join(dir_path, 'pybind11/include'))
+'-I{}'.format(os.path.join(dir_path, 'pybind11/include')),
+'-I{}'.format(os.path.join(dir_path, 'robin-map/include'))
 ]
 
 

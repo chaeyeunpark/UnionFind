@@ -155,13 +155,13 @@ private:
 			peeling_edges_.push_back(fuse_edge);
 
 
-			// let size of the cluster of root1 is larger than that of root2
+			// let the size of the cluster of root1 be larger than that of root2
 			if(mgr_.size(root1) < mgr_.size(root2))
 				std::swap(root1, root2);
 
 			root_of_vertex_[root2] = root1;
 
-			if(!mgr_.is_root(root2)) // if to merge is a single vertex
+			if(!mgr_.is_root(root2)) // if merging one is a single vertex
 			{
 				++mgr_.size(root1);
 				border_vertices_[root1].emplace(root2);
@@ -241,13 +241,11 @@ public:
 
 		while(!mgr_.isempty_odd_root())
 		{
-			//mgr_.print(std::cerr);
 			for(auto root: mgr_.odd_roots())
 			{
 				grow(root);
 			}
 			fusion();
-
 		}
 
 		return peeling(syndromes);
