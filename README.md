@@ -43,7 +43,6 @@ This repository does not contain an implementation of weighted Union-Find decode
 
 # Reference
 When you cite this repository, pelase use the following:
-When using PyMatching for research, please cite:
 ```
 @misc{UnionFindCPP,
   author = {Chae-Yeun Park and Kai Meinerz},
