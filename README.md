@@ -40,3 +40,16 @@ decoder.clear() # should be called for reuse
 
 # Notes
 This repository does not contain an implementation of weighted Union-Find decoder. 
+
+# Reference
+When you cite this repository, pelase use the following:
+When using PyMatching for research, please cite:
+```
+@misc{UnionFindCPP,
+  author = {Chae-Yeun Park and Kai Meinerz},
+  title = {Open-source C++ implementation of the Union-Find decoder},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/chaeyeunpark/UnionFind}}
+}
