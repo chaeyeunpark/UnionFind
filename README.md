@@ -4,7 +4,7 @@ Python interface is also implemented using [pybind11](https://github.com/pybind/
 
 Based on Python implemtation by Kai Meinerz.
 
-Under LGPL lisence. 
+Under LGPL license. 
 
 
 # Implementation detail
