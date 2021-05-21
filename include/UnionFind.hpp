@@ -16,7 +16,7 @@
 #include "utility.hpp"
 #include "RootManager.hpp"
 
-
+template<class Lattice>
 class UnionFindDecoder
 {
 public:
@@ -24,7 +24,7 @@ public:
 	using RootIterator = tsl::robin_set<Vertex>::const_iterator;
 
 private:
-	int L_;
+	const Lattice lattice_;
 
 	/* index: vertex */
 	std::vector<Vertex> connection_counts_;
@@ -42,52 +42,33 @@ private:
 	std::deque<Edge> peeling_edges_;
 
 
-	inline int to_vertex_index(int row, int col) const
-	{
-		return ::to_vertex_index(L_, row, col);
-	}
-
 	void init_cluster(const std::vector<int>& roots)
 	{
-		connection_counts_ = std::vector<Vertex>(L_*L_, 0);
-		support_ = std::vector<int>(2*L_*L_, 0);
+		connection_counts_ = std::vector<Vertex>(lattice_.num_vertices(), 0);
+		support_ = std::vector<int>(lattice_.num_edges(), 0);
 		mgr_.initialize_roots(roots);
 		for(auto root: roots)
 		{
 			border_vertices_[root].emplace(root);
 		}
 
-		root_of_vertex_.resize(L_*L_);
+		root_of_vertex_.resize(lattice_.num_vertices());
 
-		for(int u = 0; u < L_*L_; ++u)
+		for(int u = 0; u < lattice_.num_vertices(); ++u)
 		{
 			root_of_vertex_[u] = u;
 		}
 	}
 
-	std::array<Vertex, 4> vertex_connections(Vertex v) const
-	{
-		int row = v / L_;
-		int col = v % L_;
-
-		return {
-			to_vertex_index(row-1, col),
-			to_vertex_index(row+1,col),
-			to_vertex_index(row,col-1),
-			to_vertex_index(row,col+1),
-		};
-	}
-
-
 	void grow(Vertex root)
 	{
 		for(auto border_vertex: border_vertices_[root])
 		{
-			for(auto v: vertex_connections(border_vertex))
+			for(auto v: lattice_.vertex_connections(border_vertex))
 			{
 				auto edge = Edge(border_vertex, v);
 
-				int& elt = support_[decoder_edge_to_qubit_idx(L_, edge, ErrorType::Z)];
+				int& elt = support_[lattice_.edge_idx(edge)];
 				++elt;
 				
 				if(elt == 2)
@@ -131,7 +112,7 @@ private:
 		
 		for(auto vertex: border_vertices_[root2])
 		{
-			if(connection_counts_[vertex] == 4)
+			if(connection_counts_[vertex] == lattice_.vertex_connection_count(vertex))
 			{
 				border_vertices_[root1].erase(vertex);
 			}
@@ -223,15 +204,22 @@ private:
 
 
 public:
-	UnionFindDecoder(int L)
-		: L_{L}
+	UnionFindDecoder(const Lattice& lattice)
+		: lattice_{lattice}
 	{
 	}
 
 	std::vector<Edge> decode(std::vector<int>& syndromes)
 	{
-		std::vector<Vertex> syndrome_vertices = 
-			syndrome_locations(L_, syndromes);
+		assert(syndromes.size() == lattice_.num_vertices());
+		std::vector<Vertex> syndrome_vertices;
+		for(int n = 0; n < syndromes.size(); ++n)
+		{
+			if ((syndromes[n] % 2) != 0)
+			{
+				syndrome_vertices.emplace_back(n);
+			}
+		}
 
 		init_cluster(syndrome_vertices);
 
@@ -262,7 +250,7 @@ public:
 	nlohmann::json clusters()
 	{
 		std::map<Vertex, std::vector<Vertex>> cluster;
-		for(Vertex v = 0; v < L_*L_; ++v)
+		for(Vertex v = 0; v < lattice_.num_vertices(); ++v)
 		{
 			Vertex root = find_root(v);
 			if(mgr_.size(root) != 0)

@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "ErrorGenerator.hpp"
+#include "Lattice2D.hpp"
 #include "UnionFind.hpp"
 
 int main(int argc, char* argv[])
@@ -21,7 +22,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	uint32_t L;
+	int L;
 	double p;
 
 	sscanf(argv[1], "%d", &L);
@@ -47,7 +48,8 @@ int main(int argc, char* argv[])
 
 	int acc = 0;
 	
-	UnionFindDecoder decoder(L);
+	Lattice2D lattice{L};
+	UnionFindDecoder decoder(lattice);
 	for(int n = 0; n < n_iter; ++n)
 	{
 		auto [x_errors, z_errors] = gen.get_errors(L, p, NoiseType::Depolarizing);

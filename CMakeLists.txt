@@ -40,7 +40,8 @@ add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utili
 add_executable(TestUnionFind "Test/TestUnionFind.cpp" "src/utility.cpp")
 add_executable(TestLogical "Test/TestLogical.cpp" "src/utility.cpp")
 
-add_executable(RunUnionFind "src/RunUnionFind.cpp" "src/utility.cpp")
+add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp")
+add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp")
 add_executable(measure_time "src/measure_time.cpp" "src/utility.cpp")
 
 pybind11_add_module(union_find "src/UnionFindPy.cpp" "src/utility.cpp")
