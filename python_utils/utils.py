@@ -1,6 +1,7 @@
-#This code is based on PyMatching document 
-#https://pymatching.readthedocs.io/en/stable/toric-code-example.html
-#Modified for C++ the UnionFind Project <https://github.com/chaeyeunpark/UnionFind>
+# This code is based on PyMatching document 
+# https://pymatching.readthedocs.io/en/stable/toric-code-example.html
+# Modified for the C++ UnionFind Project <https://github.com/chaeyeunpark/UnionFind>
+
 import numpy as np
 from scipy.sparse import hstack, kron, eye, csr_matrix, block_diag
 

@@ -11,6 +11,7 @@ Main page
    :caption: Contents:
 
    install
+   usage
    custom_lattice
 
 Indices and tables
