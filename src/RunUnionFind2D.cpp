@@ -42,14 +42,13 @@ int main(int argc, char* argv[])
 
 	chrono::microseconds total_dur{0};
 
-	const uint32_t n_iter = 1'000;
+	const uint32_t n_iter = 100'000;
 
 	fprintf(stderr, "#L = %d, p = %f\n", L, p);
 
 	int acc = 0;
 	
-	Lattice2D lattice{L};
-	UnionFindDecoder decoder(lattice);
+	UnionFindDecoder<Lattice2D> decoder(L);
 	for(int n = 0; n < n_iter; ++n)
 	{
 		auto [x_errors, z_errors] = gen.get_errors(L, p, NoiseType::Depolarizing);

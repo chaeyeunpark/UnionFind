@@ -17,15 +17,15 @@ def vertex_to_coord(L, vidx):
     return (vidx // L, vidx % L)
 
 def to_edge(L, edge_index):
-    row, col = divmod(edge_index, 2*L)
+    row, col = divmod(edge_index % (L*L), L)
 
-    if col < L: # horizontal edge
-        u = to_vertex_index(L, row, col)
-        v = to_vertex_index(L, row, col+1)
+    if edge_index < L*L: # vertical
+        u = to_vertex_index(L, row, col-1)
+        v = to_vertex_index(L, row, col)
 
     else:
-        u = to_vertex_index(L, row, col - L)
-        v = to_vertex_index(L, row+1, col - L)
+        u = to_vertex_index(L, row, col)
+        v = to_vertex_index(L, row+1, col)
 
     return (min(u,v), max(u,v))
 

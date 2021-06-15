@@ -1,18 +1,18 @@
-# UnionFind
+# UnionFindCPP
 C++ implementation of Union-Find decoder [arXiv:1709:06218](https://arxiv.org/abs/1709.06218). 
 Python interface is also implemented using [pybind11](https://github.com/pybind/pybind11). 
 
-Based on Python implemtation by Kai Meinerz.
+Based on Python implementation by Kai Meinerz.
 
-Under LGPL lisence. 
+Under the LGPL lisence. 
 
 
 # Implementation detail
 Our implementation mostly follows the original paper but slightly differ in implementation of peeling decoder. 
 
 The peeling decoder introduced in [arXiv:1703.01517](https://arxiv.org/abs/1703.01517) decodes erasure errors in linear-time by finding a minimum spanning tree from possible error configurations. This peeling decoder is utilized at the final stage of Union-Find decoder. 
-There are lots of algorithms for finding a minimum spanning tree but here we implemented a greedy type of alogrithm as it is the most simple. 
-Especially, our greedy algorithm does not introduce any additional hash set/map that may be required in other alrogrithms, saves some contant overheads for initializing such data structures.
+There are lots of algorithms for finding a minimum spanning tree but here we implemented a greedy type of algorithm as it is the most simple. 
+Especially, our greedy algorithm does not introduce any additional hash set/map that may be required in other algorithms, saves some constant overheads for initializing such data structures.
 In addition, even though the worst-time complexity of our greedy algorithm is not linear, we have not observed this part slows down overall decoding time from our profiling results. More than 90% of time is taken by the main Union-Find algorithm regardless of the lattice size and error rates.
 
 # Usage
@@ -38,11 +38,18 @@ decoder.decode(syndromes) # syndromes is a list of size L^2
 decoder.clear() # should be called for reuse
 ```
 
+
+
 # Notes
 This repository does not contain an implementation of weighted Union-Find decoder. 
 
+# Changes from v0.1
+* Qubit ordering has been changed. Now it is compatible with [PyMatching](https://github.com/oscarhiggott/PyMatching).
+* 3D version is added to address noisy syndrome measurements.
+
+
 # Reference
-When you cite this repository, pelase use the following:
+When you cite this repository, please use the following:
 ```
 @misc{UnionFindCPP,
   author = {Chae-Yeun Park and Kai Meinerz},

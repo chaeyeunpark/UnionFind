@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 	}
 
 	LatticeCubic lattice{L};
-	UnionFindDecoder decoder(lattice);
+	UnionFindDecoder<LatticeCubic> decoder(L);
 	uint32_t n_success = 0;
 	for(int n = 0; n < n_iter; ++n)
 	{

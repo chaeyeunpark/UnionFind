@@ -16,6 +16,7 @@
 #include "utility.hpp"
 #include "RootManager.hpp"
 
+
 template<class Lattice>
 class UnionFindDecoder
 {
@@ -204,8 +205,9 @@ private:
 
 
 public:
-	UnionFindDecoder(const Lattice& lattice)
-		: lattice_{lattice}
+	template<typename ...Args>
+	UnionFindDecoder(Args&&... args)
+		: lattice_{args...}
 	{
 	}
 
@@ -234,6 +236,23 @@ public:
 
 		return peeling(syndromes);
 	}
+
+	inline int num_vertices() const
+	{
+		return lattice_.num_vertices();
+	}
+
+	inline int num_edges() const
+	{
+		return lattice_.num_edges();
+	}
+
+	inline int edge_idx(const Edge& edge) const
+	{
+		return lattice_.edge_idx(edge);
+	}
+
+
 
 	void clear()
 	{

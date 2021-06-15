@@ -39,17 +39,6 @@ void to_json(nlohmann::json& j, const Edge& e);
 void from_json(const nlohmann::json& j, Edge& e);
 
 
-inline bool is_horizontal(int L, Edge e)
-{
-	return ((e.v - e.u) == 1) || ((e.v - e.u) == (L-1));
-}
-inline bool is_vertical(int L, Edge e)
-{
-	return !is_horizontal(L, e);
-}
-
-int lower(int L, Edge e); // works only when vertical
-int left(int L, Edge e); // works only when horizontal
 
 constexpr int to_vertex_index(int L, const int row, const int col)
 {
