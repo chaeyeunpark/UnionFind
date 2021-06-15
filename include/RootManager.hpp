@@ -113,7 +113,7 @@ public:
 	{
 
 #ifdef DEBUG
-		fprintf(stderr, "merging root %d to %d\n", root2, root1);
+		//fprintf(stderr, "merging root %d to %d\n", root2, root1);
 #endif
 
 		const auto new_parity = parity(root1) + parity(root2);

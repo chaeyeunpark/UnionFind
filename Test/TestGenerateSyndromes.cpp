@@ -12,7 +12,7 @@ int main()
 
 	const uint32_t L = 11;
 
-	auto [x_errors, z_errors] = gen.get_errors(L, 0.1, NoiseType::Depolarizing);
+	auto [x_errors, z_errors] = gen.get_errors(L, 0.06, NoiseType::Depolarizing);
 
 	auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
 	auto synd_z = errors_to_syndromes(L, z_errors, ErrorType::Z);
