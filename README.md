@@ -4,7 +4,7 @@
 C++ implementation of the Union-Find decoder [arXiv:1709:06218](https://arxiv.org/abs/1709.06218). 
 Python interface is also implemented using [pybind11](https://github.com/pybind/pybind11). 
 
-Based on Python implementation by Kai Meinerz.
+Based on a Python implementation by Kai Meinerz.
 
 Under the LGPL lisence. 
 
