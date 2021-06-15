@@ -1,4 +1,6 @@
 # UnionFind
+[![Documentation Status](https://readthedocs.org/projects/unionfind/badge/?version=latest)](https://unionfind.readthedocs.io/en/latest/?badge=latest)
+
 C++ implementation of Union-Find decoder [arXiv:1709:06218](https://arxiv.org/abs/1709.06218). 
 Python interface is also implemented using [pybind11](https://github.com/pybind/pybind11). 
 
