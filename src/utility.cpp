@@ -139,11 +139,11 @@ Edge to_edge(const int L, int edge_index)
 	int col = edge_index % L;
 	if((edge_index / (L*L)) == 0) //vertical edge
 	{
-		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row, col-1));
+		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row-1, col));
 	}
 	else //horizontal edge
 	{
-		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row+1, col));
+		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row, col+1));
 	}
 }
 
