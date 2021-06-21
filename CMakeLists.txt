@@ -36,12 +36,9 @@ if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
 endif()
 
 
-add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp")
-add_executable(TestUnionFind "Test/TestUnionFind.cpp" "src/utility.cpp")
-add_executable(TestLogical "Test/TestLogical.cpp" "src/utility.cpp")
+add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
 
-add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp")
-add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp")
-add_executable(measure_time "src/measure_time.cpp" "src/utility.cpp")
+add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
 
 pybind11_add_module(union_find "src/UnionFindPy.cpp" "src/utility.cpp")

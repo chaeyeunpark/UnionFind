@@ -20,12 +20,12 @@ def to_edge(L, edge_index):
     row, col = divmod(edge_index % (L*L), L)
 
     if edge_index < L*L: # vertical
-        u = to_vertex_index(L, row, col-1)
+        u = to_vertex_index(L, row-1, col)
         v = to_vertex_index(L, row, col)
 
     else:
         u = to_vertex_index(L, row, col)
-        v = to_vertex_index(L, row+1, col)
+        v = to_vertex_index(L, row, col+1)
 
     return (min(u,v), max(u,v))
 
@@ -50,6 +50,7 @@ def plot_errors(ax, L, errors, error_type):
     edges = []
     for n in range(2*L*L):
         if errors[n] % 2 != 0:
+            print(f'{error_type} error at {n}')
             edges += edge_index_to_plot(L, n)
 
     if error_type == 'Z':

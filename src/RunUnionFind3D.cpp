@@ -7,10 +7,10 @@
 
 #include <Eigen/Dense>
 
-#include "ErrorGenerator.hpp"
-#include "Lattice2D.hpp"
 #include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
+
+#include "cpp_utils.hpp"
 
 void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
 {
@@ -24,85 +24,87 @@ void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
 }
 
 template<class RandomEngine>
-std::pair<std::vector<int>, std::vector<int>>
-noisy_syndromes(const LatticeCubic& lattice, double p, RandomEngine& re)
+std::pair<Eigen::ArrayXXi, Eigen::ArrayXXi>
+generate_errors(const LatticeCubic& lattice, double p, RandomEngine& re,
+		NoiseType noise_type)
 {
 	const int L = lattice.getL();
-	Eigen::ArrayXXi qubit_errors = Eigen::ArrayXXi::Zero(2*L*L, L); //repetetions L
-	auto syndromes = std::vector<int>(lattice.num_vertices(), 0); //length L^3
+	Eigen::ArrayXXi qubit_errors_x = Eigen::ArrayXXi::Zero(2*L*L, L); //repetetions L
+	Eigen::ArrayXXi qubit_errors_z = Eigen::ArrayXXi::Zero(2*L*L, L); //repetetions L
 
-	std::uniform_real_distribution<> dist(0., 1.);
-
-	for(int h = 0; h < L; ++h)
+	for(int r = 0; r < L; ++r)
 	{
-		for(int eidx = 0; eidx < 2*L*L; ++eidx)
-		{
-			qubit_errors(eidx, h) = int(dist(re) < p);
-		}
+		auto [layer_error_x, layer_error_z] = create_errors(re, 2*L*L, p, noise_type);
+		qubit_errors_x.col(r) = layer_error_x;
+		qubit_errors_z.col(r) = layer_error_z;
 	}
-#ifndef NDEBUG
-	std::cerr << "qubit_errors: \n";
-	print_qubit_errors(L, qubit_errors);
-#endif
 
 	//cumsum
 	for(int h = 1; h < L; ++h)
 	{
-		qubit_errors.col(h) += qubit_errors.col(h-1);
+		qubit_errors_x.col(h) += qubit_errors_x.col(h-1);
+		qubit_errors_z.col(h) += qubit_errors_z.col(h-1);
 	}
-	qubit_errors = qubit_errors.unaryExpr([](int x){ return x % 2;});
-#ifndef NDEBUG
-	std::cerr << "qubit_errors cumsum: \n";
-	print_qubit_errors(L, qubit_errors);
-#endif
-	std::vector<int> error_total(2*L*L);
-	for(size_t n = 0; n < 2*L*L; ++n)
-	{
-		error_total[n] = qubit_errors(n, L-1);
-	}
+	qubit_errors_x = qubit_errors_x.unaryExpr([](int x){ return x % 2;});
+	qubit_errors_z = qubit_errors_z.unaryExpr([](int x){ return x % 2;});
 
+	return std::make_pair(qubit_errors_x, qubit_errors_z);
+}
+
+std::vector<int>
+calc_syndromes(const LatticeCubic& lattice, 
+		const Eigen::ArrayXXi& errors, ErrorType error_type)
+{
+	const int L = lattice.getL();
+	std::vector<int> syndromes(lattice.num_vertices());
 	for(int h = 0; h < L; ++h)
 	{
-		auto layer_error = std::vector<int>(qubit_errors.data() + h*2*L*L, 
-				qubit_errors.data() + (h+1)*2*L*L);
-		auto layer_syndrome = z_error_to_syndrome_x(L, layer_error);
+		Eigen::ArrayXi layer_error = errors.col(h);
+		auto layer_syndrome = [L, error_type, &layer_error]
+		{
+			switch(error_type)
+			{
+			case ErrorType::Z:
+				return z_error_to_syndrome_x(L, layer_error);
+			case ErrorType::X:
+				return x_error_to_syndrome_z(L, layer_error);
+			}
+		}();
 		std::copy(layer_syndrome.begin(), layer_syndrome.end(),
 				syndromes.begin() + h*L*L);
 	}
 
-	//add measurement noise
-	Eigen::ArrayXXi measurement_errors = Eigen::ArrayXXi::Zero(L*L, L); 	
-	for(int h = 0; h < L-1; ++h)//perfect measurements in the last round
-	{
-		for(int eidx = 0; eidx < L*L; ++eidx)
-		{
-			measurement_errors(eidx, h) = int(dist(re) < p);
-		}
-	}
+	return syndromes;
+}
+
+template<typename RandomEngine>
+void add_measurement_noise(const int L, RandomEngine& re, 
+		std::vector<int>& syndromes, const Eigen::ArrayXXi& measurement_error)
+{
 	Eigen::Map<Eigen::ArrayXXi> syndromes_map(syndromes.data(), L*L, L);
-	syndromes_map += measurement_errors;
+	syndromes_map += measurement_error;
+}
 
-#ifndef NDEBUG
-	std::cerr << "measurement_errors: \n" << measurement_errors << std::endl;
-#endif
 
+void layer_syndrome_diff(const int L, std::vector<int>& syndromes)
+{
+	Eigen::Map<Eigen::ArrayXXi> syndromes_map(syndromes.data(), L*L, L);
 	for(int h = L-1; h >= 1; --h)
 	{
 		syndromes_map.col(h) -= syndromes_map.col(h-1);
 	}
 	syndromes_map = syndromes_map.unaryExpr([](int x){ return (x+2)%2;});
-
-	return std::make_pair(error_total, syndromes);
 }
 
-bool has_logical_error(int L, std::vector<int>& error_total, const std::vector<Edge>& corrections)
+bool has_logical_error(int L, Eigen::ArrayXi& error_total, 
+		const std::vector<Edge>& corrections, ErrorType error_type)
 {
 	for(auto edge: corrections)
 	{
 		if(edge.u/(L*L) == edge.v/(L*L)) //edge is timelike
 		{
 			auto corr_edge = Edge{edge.u % (L*L), edge.v % (L*L)};
-			int corr_qubit = decoder_edge_to_qubit_idx(L, corr_edge, ErrorType::Z);
+			int corr_qubit = decoder_edge_to_qubit_idx(L, corr_edge, error_type);
 			error_total[corr_qubit] += 1;
 
 #ifndef NDEBUG
@@ -112,18 +114,15 @@ bool has_logical_error(int L, std::vector<int>& error_total, const std::vector<E
 		}
 	}
 
-	for(int& e: error_total)
-		e %= 2;
-
-	return logical_error(L, error_total, ErrorType::Z);
+	return logical_error(L, error_total, error_type);
 }
 
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
 	std::random_device rd;
-	std::default_random_engine re{1337u};
-
+	std::default_random_engine re{rd()};
+	auto noise_type = NoiseType::Depolarizing;
 
 	if(argc != 3)
 	{
@@ -131,7 +130,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	const uint32_t n_iter = 1'000'000;
+	const uint32_t n_iter = 100'000;
 	int L;
 	double p;
 
@@ -153,23 +152,53 @@ int main(int argc, char* argv[])
 	LatticeCubic lattice{L};
 	UnionFindDecoder<LatticeCubic> decoder(L);
 	uint32_t n_success = 0;
+	chrono::microseconds total_dur{0};
 	for(int n = 0; n < n_iter; ++n)
 	{
-		auto [error_total, syndromes] = noisy_syndromes(lattice, p, re);
-		decoder.clear();
-		auto corrections = decoder.decode(syndromes);
+		std::cerr << "Processing " << n << std::endl;
+		auto [error_x, error_z] = 
+			generate_errors(lattice, p, re, noise_type);
 
-#ifndef NDEBUG
-		for(const auto&edge: corrections)
-		{
-			std::cout << "[" << edge.u << ", " << edge.v << "]" << std::endl;
-		}
-#endif
-		if(!has_logical_error(L, error_total, corrections))
+		auto synd_x = calc_syndromes(lattice, error_x, ErrorType::X);
+		auto synd_z = calc_syndromes(lattice, error_z, ErrorType::Z);
+
+		Eigen::ArrayXi error_total_x = error_x.col(L-1);
+		Eigen::ArrayXi error_total_z = error_z.col(L-1);
+
+		const auto [measurement_error_x, measurement_error_z]
+			= create_measurement_errors(re, L*L, L, p, noise_type);
+		
+		add_measurement_noise(L, re, synd_x, measurement_error_x);
+		add_measurement_noise(L, re, synd_z, measurement_error_z);
+
+		layer_syndrome_diff(L, synd_x);
+		layer_syndrome_diff(L, synd_z);
+
+		auto start = chrono::high_resolution_clock::now();
+		decoder.clear();
+		auto corrections_x = decoder.decode(synd_x);
+		decoder.clear();
+		auto corrections_z = decoder.decode(synd_z);
+		auto end = chrono::high_resolution_clock::now();
+
+		if((!has_logical_error(L, error_total_x, corrections_x, ErrorType::X)) &&
+				(!has_logical_error(L, error_total_z, corrections_z, ErrorType::Z)))
 		{
 			++n_success ;
 		}
+
+		auto dur = chrono::duration_cast<chrono::microseconds> (end-start);
+		total_dur += dur;
 	}
-	std::cout << double(n_success)/n_iter << std::endl;
+	char filename[255];
+	sprintf(filename, "out_L%d_%05d.json", L, int(p*10000+0.5));
+	std::ofstream out_data(filename);
+	nlohmann::json out_j;
+	out_j["L"] = L;
+	out_j["total_dur"] = total_dur.count();
+	out_j["p"] = p;
+	out_j["accuracy"] = double(n_success)/n_iter;
+
+	out_data << out_j.dump(0);
 	return 0;
 }

@@ -5,16 +5,29 @@
 
 #include <chrono>
 
-#include "ErrorGenerator.hpp"
 #include "Lattice2D.hpp"
 #include "UnionFind.hpp"
+
+#include "utility.hpp"
+#include "cpp_utils.hpp"
+
+
+void add_corrections(const int L, const std::vector<Edge>& corrections, 
+		Eigen::ArrayXi& error, ErrorType error_type)
+{
+	for(auto e: corrections)
+	{
+		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
+		error[idx] += 1;
+	}
+}
+
 
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
 	std::random_device rd;
-	ErrorGenerator<std::default_random_engine> gen;
-
+	std::default_random_engine re{rd()};
 
 	if(argc != 3)
 	{
@@ -51,7 +64,8 @@ int main(int argc, char* argv[])
 	UnionFindDecoder<Lattice2D> decoder(L);
 	for(int n = 0; n < n_iter; ++n)
 	{
-		auto [x_errors, z_errors] = gen.get_errors(L, p, NoiseType::Depolarizing);
+		auto [x_errors, z_errors] = create_errors(re, decoder.num_edges(),
+				p, NoiseType::Depolarizing);
 
 		auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
 		auto synd_z = errors_to_syndromes(L, z_errors, ErrorType::Z);

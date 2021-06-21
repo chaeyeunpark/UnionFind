@@ -38,6 +38,47 @@ struct Edge
 void to_json(nlohmann::json& j, const Edge& e);
 void from_json(const nlohmann::json& j, Edge& e);
 
+inline bool is_horizontal(int L, Edge e)
+{
+	return ((e.v - e.u) == 1) || ((e.v - e.u) == (L-1));
+}
+inline bool is_vertical(int L, Edge e)
+{
+	return !is_horizontal(L, e);
+}
+
+inline int lower(int L, Edge e) // works only when vertical
+{
+	if((e.v - e.u) == L)
+		return e.u;
+	else
+		return e.v;
+}
+
+inline int upper(int L, Edge e)
+{
+	if((e.v - e.u) == L)
+		return e.v;
+	else
+		return e.u;
+}
+
+inline int left(int L, Edge e) // works only when horizontal
+{
+	if((e.v - e.u) == 1)
+		return e.u;
+	else
+		return e.v;
+}
+inline int right(int L, Edge e) // works only when horizontal
+{
+	if((e.v - e.u) == 1)
+		return e.v;
+	else
+		return e.u;
+}
+
+
 
 
 constexpr int to_vertex_index(int L, const int row, const int col)
@@ -59,22 +100,5 @@ bool logical_error(const int L, const std::vector<int>& error, ErrorType error_t
 
 
 Edge to_edge(const int L, int edge_index);
-std::vector<int> z_error_to_syndrome_x(const int L, const std::vector<int>& z_error);
-std::vector<int> x_error_to_syndrome_z(const int L, const std::vector<int>& x_error);
 
-/*
- * if error_type is X, the output is error locations in the dual lattice.
- * @param	error	An array of length 2*L*L where element 1 indicates the error at the given index
- * */
-inline std::vector<int> errors_to_syndromes(const int L, 
-		const std::vector<int>& error, ErrorType error_type) 
-{
-	switch(error_type)
-	{
-	case ErrorType::X:
-		return x_error_to_syndrome_z(L, error);
-	case ErrorType::Z:
-		return z_error_to_syndrome_x(L, error);
-	}
-	return {};
-}
+

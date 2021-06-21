@@ -76,7 +76,7 @@ public:
 		int L = L_;
 		int uh = edge.u / (L*L);
 
-		if ((edge.u / (L*L)) == (edge.v / (L*L))) //edge is timelike
+		if ((edge.u / (L*L)) == (edge.v / (L*L))) //edge is spacelike
 		{
 			return decoder_edge_to_qubit_idx(L, Edge{edge.u % (L*L), edge.v % (L*L)},
 					ErrorType::Z) + 3*L*L*uh;
@@ -100,7 +100,7 @@ public:
 			auto [row, col] = ::vertex_to_coord(L, layer_idx-2*L*L);
 			return Edge{to_vertex_index(row, col, h), to_vertex_index(row, col, h+1)};
 		}
-		else //edge is timelike
+		else //edge is spacelike
 		{
 			Edge e_2d = ::to_edge(L, layer_idx);
 			return Edge{e_2d.u + h*L*L, e_2d.v + h*L*L};

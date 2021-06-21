@@ -2,25 +2,25 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 
-#include "ErrorGenerator.hpp"
+#include "cpp_utils.hpp"
 #include "utility.hpp"
 
 int main()
 {
 	std::random_device rd;
-	ErrorGenerator<std::default_random_engine> gen;
+	std::default_random_engine re{rd()};
 
-	const uint32_t L = 11;
+	const uint32_t L = 5;
 
-	auto [x_errors, z_errors] = gen.get_errors(L, 0.06, NoiseType::Depolarizing);
+	auto [x_errors, z_errors] = create_errors(re, 2*L*L, 0.06, NoiseType::Depolarizing);
 
 	auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
 	auto synd_z = errors_to_syndromes(L, z_errors, ErrorType::Z);
 
 	nlohmann::json err_j = {};
 	err_j["L"] = L;
-	err_j["x_errors"] = x_errors;
-	err_j["z_errors"] = z_errors;
+	err_j["x_errors"] = std::vector<int>(x_errors.data(), x_errors.data() + 2*L*L);
+	err_j["z_errors"] = std::vector<int>(z_errors.data(), z_errors.data() + 2*L*L);
 
 	err_j["syndromes_for_x"] = synd_x;
 	err_j["syndromes_for_z"] = synd_z;
