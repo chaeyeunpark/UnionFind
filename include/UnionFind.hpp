@@ -70,9 +70,9 @@ private:
 				auto edge = Edge(border_vertex, v);
 
 				int& elt = support_[lattice_.edge_idx(edge)];
-				++elt;
-				
 				if(elt == 2)
+					continue;
+				if(++elt == 2)
 				{
 					connection_counts_[edge.u] ++;
 					connection_counts_[edge.v] ++;

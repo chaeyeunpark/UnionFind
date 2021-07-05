@@ -33,6 +33,17 @@ struct Edge
 	}
 };
 
+template <>
+struct std::hash<Edge>
+{
+	std::size_t operator()(const Edge& e) const noexcept
+	{
+		auto h1 = std::hash<int>()(e.u);
+		auto h2 = std::hash<int>()(e.v);
+		return h1 ^ (h2 << 1);
+	}
+};
+
 
 
 void to_json(nlohmann::json& j, const Edge& e);
