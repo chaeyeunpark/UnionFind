@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 
 	chrono::microseconds total_dur{0};
 
-	const uint32_t n_iter = 100'000;
+	const uint32_t n_iter = 1'000'000;
 
 	fprintf(stderr, "#L = %d, p = %f\n", L, p);
 

@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "utility.hpp"
+#include "LatticeCubic.hpp"
 
 enum class NoiseType
 {
@@ -115,4 +116,49 @@ auto create_measurement_errors(RandomEngine& re,
 
 	return std::make_pair(measurement_error_x, measurement_error_z);
 }
+
+
+template<class RandomEngine>
+std::pair<Eigen::ArrayXXi, Eigen::ArrayXXi>
+generate_errors(const int num_qubits, const int repetition,	double p, 
+		RandomEngine& re, NoiseType noise_type)
+{
+	Eigen::ArrayXXi qubit_errors_x = Eigen::ArrayXXi::Zero(num_qubits, repetition);
+	Eigen::ArrayXXi qubit_errors_z = Eigen::ArrayXXi::Zero(num_qubits, repetition);
+
+	for(int r = 0; r < repetition; ++r)
+	{
+		auto [layer_error_x, layer_error_z] = create_errors(re, num_qubits, p, noise_type);
+		qubit_errors_x.col(r) = layer_error_x;
+		qubit_errors_z.col(r) = layer_error_z;
+	}
+
+	//cumsum
+	for(int h = 1; h < repetition; ++h)
+	{
+		qubit_errors_x.col(h) += qubit_errors_x.col(h-1);
+		qubit_errors_z.col(h) += qubit_errors_z.col(h-1);
+	}
+	qubit_errors_x = qubit_errors_x.unaryExpr([](int x){ return x % 2;});
+	qubit_errors_z = qubit_errors_z.unaryExpr([](int x){ return x % 2;});
+
+	return std::make_pair(qubit_errors_x, qubit_errors_z);
+}
+
+std::vector<int>
+calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors, ErrorType error_type);
+
+template<typename RandomEngine>
+void add_measurement_noise(const int L, RandomEngine& re, 
+		std::vector<int>& syndromes, const Eigen::ArrayXXi& measurement_error)
+{
+	Eigen::Map<Eigen::ArrayXXi> syndromes_map(syndromes.data(), L*L, L);
+	syndromes_map += measurement_error;
+}
+
+void layer_syndrome_diff(const int L, std::vector<int>& syndromes);
+
+bool has_logical_error(int L, Eigen::ArrayXi& error_total, 
+		const std::vector<Edge>& corrections, ErrorType error_type);
+
 

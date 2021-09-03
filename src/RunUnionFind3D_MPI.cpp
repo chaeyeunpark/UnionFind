@@ -2,34 +2,34 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
-
+#include <atomic>
 #include <chrono>
 
 #include <Eigen/Dense>
 
+#include <sstream>
+
+#include <mpi.h>
+
+#include "error_utils.hpp"
 #include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
-
-#include "cpp_utils.hpp"
-
-void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
-{
-	for(int h = 0; h < L; ++h)
-	{
-		Eigen::ArrayXi layer_error = qubit_errors.col(h);
-		std::cerr << "Layer: " << h << "\n";
-		auto m = Eigen::Map<Eigen::MatrixXi>(layer_error.data(), 2*L, L);
-		std::cerr << m.transpose() << "\n";
-	}
-}
-
 
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
+
+	int mpi_rank, mpi_size;
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
 	std::random_device rd;
 	std::default_random_engine re{rd()};
+
 	auto noise_type = NoiseType::Depolarizing;
+
 
 	if(argc != 3)
 	{
@@ -37,7 +37,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	const uint32_t n_iter = 100'000;
+	const uint32_t n_iter = 10'000'000;
+	//const uint32_t n_iter = 960*100;
+	//const uint32_t n_iter = 960*5;
 	int L;
 	double p;
 
@@ -56,13 +58,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	fprintf(stderr, "Processing at rank = %d, size = %d\n", mpi_rank, mpi_size);
+
+	uint32_t n_success = 0u;
+	chrono::microseconds node_dur;
 	LatticeCubic lattice{L};
 	UnionFindDecoder<LatticeCubic> decoder(L);
-	uint32_t n_success = 0;
-	chrono::microseconds total_dur{0};
-	for(int n = 0; n < n_iter; ++n)
+	for(uint32_t k = mpi_rank; k < n_iter; k += mpi_size)
 	{
-		std::cerr << "Processing " << n << std::endl;
 		auto [error_x, error_z] = 
 			generate_errors(2*L*L, L, p, re, noise_type);
 
@@ -95,17 +98,33 @@ int main(int argc, char* argv[])
 		}
 
 		auto dur = chrono::duration_cast<chrono::microseconds> (end-start);
-		total_dur += dur;
+		node_dur += dur;
 	}
-	char filename[255];
-	sprintf(filename, "out_L%d_%05d.json", L, int(p*10000+0.5));
-	std::ofstream out_data(filename);
-	nlohmann::json out_j;
-	out_j["L"] = L;
-	out_j["total_dur"] = total_dur.count();
-	out_j["p"] = p;
-	out_j["accuracy"] = double(n_success)/n_iter;
+	MPI_Barrier(MPI_COMM_WORLD);
+	
+	int64_t dur_in_microseconds = node_dur.count();
+	int64_t total_dur_in_microseconds = 0;
+	MPI_Allreduce(&dur_in_microseconds, &total_dur_in_microseconds,
+			1, MPI_LONG, MPI_SUM, MPI_COMM_WORLD);
 
-	out_data << out_j.dump(0);
+	uint32_t total_success = 0;
+	MPI_Allreduce(&n_success, &total_success, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+
+
+	if(mpi_rank == 0)
+	{
+		char filename[255];
+		sprintf(filename, "out_L%d_%06d.json", L, int(p*100000+0.5));
+		std::ofstream out_data(filename);
+		nlohmann::json out_j;
+		out_j["L"] = L;
+		out_j["average_microseconds"] = double(total_dur_in_microseconds)/n_iter;
+		out_j["p"] = p;
+		out_j["accuracy"] = double(total_success)/n_iter;
+
+		out_data << out_j.dump(0);
+	}
+
+	MPI_Finalize();
 	return 0;
 }

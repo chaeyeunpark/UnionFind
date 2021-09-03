@@ -12,6 +12,8 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
+find_package(MPI REQUIRED)
+
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -36,9 +38,13 @@ if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
 endif()
 
 
-add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/error_utils.cpp")
 
-add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
-add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/error_utils.cpp")
+add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/error_utils.cpp")
+
+add_executable(RunUnionFind3D_MPI "src/RunUnionFind3D_MPI.cpp" "src/utility.cpp" 
+	"src/error_utils.cpp")
+target_link_libraries(RunUnionFind3D_MPI PRIVATE MPI::MPI_CXX)
 
 pybind11_add_module(union_find "src/UnionFindPy.cpp" "src/utility.cpp")
