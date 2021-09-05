@@ -18,6 +18,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(LINK_WHAT_YOU_USE TRUE)
 set(BUILD_RPATH_USE_ORIGIN TRUE)
 
+option(BUILD_EXECUTABLE "Build C++ executables" OFF)
+
+if (BUILD_EXECUTABLE)
+	find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+endif()
+
 set(JSON_URL "https://github.com/nlohmann/json/releases/download/v3.7.3/json.hpp")
 set(JSON_DOWNLOAD_DIR "${CMAKE_SOURCE_DIR}/externals/nlohmann")
 set(JSON_DOWNLOAD_PATH "${JSON_DOWNLOAD_DIR}/json.hpp")
@@ -36,10 +42,20 @@ if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
 endif()
 
 
-add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+if (BUILD_EXECUTABLE)
+	add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
 
-add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
-add_executable(RunUnionFind2D_bitflip_lazy "src/RunUnionFind2D_bitflip_lazy.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
-add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+	add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+	target_link_libraries(RunUnionFind2D Eigen3::Eigen)
+
+	add_executable(RunUnionFind2D_bitflip "src/RunUnionFind2D_bitflip.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+	target_link_libraries(RunUnionFind2D_bitflip Eigen3::Eigen)
+
+	add_executable(RunUnionFind2D_bitflip_lazy "src/RunUnionFind2D_bitflip_lazy.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+	target_link_libraries(RunUnionFind2D_bitflip_lazy Eigen3::Eigen)
+
+	add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/cpp_utils.cpp")
+	target_link_libraries(RunUnionFind3D Eigen3::Eigen)
+endif()
 
 pybind11_add_module(union_find "src/UnionFindPy.cpp" "src/utility.cpp")
