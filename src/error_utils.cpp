@@ -103,6 +103,7 @@ calc_syndromes(const LatticeCubic& lattice,
 			case ErrorType::X:
 				return x_error_to_syndrome_z(L, layer_error);
 			}
+			__builtin_unreachable();
 		}();
 		std::copy(layer_syndrome.begin(), layer_syndrome.end(),
 				syndromes.begin() + h*L*L);

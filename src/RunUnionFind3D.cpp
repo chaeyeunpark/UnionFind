@@ -7,10 +7,9 @@
 
 #include <Eigen/Dense>
 
+#include "error_utils.hpp"
 #include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
-
-#include "cpp_utils.hpp"
 
 void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
 {
@@ -22,7 +21,6 @@ void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
 		std::cerr << m.transpose() << "\n";
 	}
 }
-
 
 int main(int argc, char* argv[])
 {

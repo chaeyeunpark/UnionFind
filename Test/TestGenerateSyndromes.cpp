@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 
-#include "cpp_utils.hpp"
+#include "error_utils.hpp"
 #include "utility.hpp"
 
 int main()
