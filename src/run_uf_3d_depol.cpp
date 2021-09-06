@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 	nlohmann::json out_j;
 	out_j["L"] = L;
 	out_j["total_dur"] = total_dur.count();
+	out_j["average_microseconds"] = double(total_dur.count())/n_iter;
 	out_j["p"] = p;
 	out_j["accuracy"] = double(n_success)/n_iter;
 

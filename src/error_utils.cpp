@@ -128,7 +128,7 @@ bool has_logical_error(int L, Eigen::ArrayXi& error_total,
 {
 	for(auto edge: corrections)
 	{
-		if(edge.u/(L*L) == edge.v/(L*L)) //edge is timelike
+		if(edge.u/(L*L) == edge.v/(L*L)) //edge is spacelike
 		{
 			auto corr_edge = Edge{edge.u % (L*L), edge.v % (L*L)};
 			int corr_qubit = decoder_edge_to_qubit_idx(L, corr_edge, error_type);
@@ -140,6 +140,16 @@ bool has_logical_error(int L, Eigen::ArrayXi& error_total,
 #endif
 		}
 	}
-
 	return logical_error(L, error_total, error_type);
+}
+
+
+void add_corrections(const int L, const std::vector<Edge>& corrections, 
+		Eigen::ArrayXi& error, ErrorType error_type)
+{
+	for(auto e: corrections)
+	{
+		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
+		error[idx] += 1;
+	}
 }

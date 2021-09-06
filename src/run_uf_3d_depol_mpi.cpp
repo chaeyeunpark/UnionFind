@@ -37,9 +37,8 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	const uint32_t n_iter = 10'000'000;
-	//const uint32_t n_iter = 960*100;
-	//const uint32_t n_iter = 960*5;
+	const uint32_t n_iter = 1'000'000;
+
 	int L;
 	double p;
 

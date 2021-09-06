@@ -12,17 +12,6 @@
 #include "cpp_utils.hpp"
 
 
-void add_corrections(const int L, const std::vector<Edge>& corrections, 
-		Eigen::ArrayXi& error, ErrorType error_type)
-{
-	for(auto e: corrections)
-	{
-		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
-		error[idx] += 1;
-	}
-}
-
-
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
@@ -61,6 +50,7 @@ int main(int argc, char* argv[])
 
 	int acc = 0;
 	
+	LazyDecoder<Lattice2D> lazy_decoder(L);
 	UnionFindDecoder<Lattice2D> decoder(L);
 	for(int n = 0; n < n_iter; ++n)
 	{
@@ -68,17 +58,19 @@ int main(int argc, char* argv[])
 				p, NoiseType::X);
 
 		auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
-		//auto synd_z = errors_to_syndromes(L, z_errors, ErrorType::Z);
 
 		auto start = chrono::high_resolution_clock::now();
 		decoder.clear();
-		auto decoding_x = decoder.decode(synd_x);
-		//decoder.clear();
-		//auto decoding_z = decoder.decode(synd_z);
+
+		auto [success, decoding] = lazy_decoder.decode(synd_x);
+		if (!success)
+		{
+			auto decoding_uf =  decoder.decode(synd_x);
+			decoding.insert(decoding.end(), decoding_uf.begin(), decoding_uf.end());
+		}
 		auto end = chrono::high_resolution_clock::now();
 
-		add_corrections(L, decoding_x, x_errors, ErrorType::X);
-		//add_corrections(L, decoding_z, z_errors, ErrorType::Z);
+		add_corrections(L, decoding, x_errors, ErrorType::X);
 
 
 		if((!logical_error(L, x_errors, ErrorType::X)))
@@ -94,12 +86,12 @@ int main(int argc, char* argv[])
 	}
 
 	char filename[255];
-	sprintf(filename, "out_L%02d_%04d.json", L, int(p*1000+0.5));
+	sprintf(filename, "out_lazy_L%02d_%04d.json", L, int(p*1000+0.5));
 	std::ofstream out_data(filename);
 	nlohmann::json out_j;
 	out_j["L"] = L;
 	out_j["total_dur"] = total_dur.count();
-	out_j["average_dur"] = double(total_dur.count()) / n_iter;
+	out_j["average_microseconds"] = double(total_dur.count())/n_iter;
 	out_j["p"] = p;
 	out_j["accuracy"] = double(acc)/n_iter;
 

@@ -12,17 +12,6 @@
 #include "error_utils.hpp"
 
 
-void add_corrections(const int L, const std::vector<Edge>& corrections, 
-		Eigen::ArrayXi& error, ErrorType error_type)
-{
-	for(auto e: corrections)
-	{
-		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
-		error[idx] += 1;
-	}
-}
-
-
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
@@ -72,10 +61,26 @@ int main(int argc, char* argv[])
 
 
 		auto start = chrono::high_resolution_clock::now();
+	
+		// Process lazy decoder
+		auto [success_x, decoding_x] = lazy_decoder.decode(synd_x);
+		if (!success)
+		{
+			decoder.clear();
+			auto decoding_uf =  decoder.decode(synd_x);
+			decoding_x.insert(decoding_x.end(), decoding_uf.begin(), decoding_uf.end());
+		}
+
+		auto [success_z, decoding_z] = lazy_decoder.decode(synd_z);
+		if (!success)
+		{
+			decoder.clear();
+			auto decoding_uf =  decoder.decode(synd_x);
+			decoding_z.insert(decoding_z.end(), decoding_uf.begin(), decoding_uf.end());
+		}
+
 		decoder.clear();
-		auto decoding_x = decoder.decode(synd_x);
-		decoder.clear();
-		auto decoding_z = decoder.decode(synd_z);
+
 		auto end = chrono::high_resolution_clock::now();
 
 		add_corrections(L, decoding_x, x_errors, ErrorType::X);
@@ -100,6 +105,7 @@ int main(int argc, char* argv[])
 	nlohmann::json out_j;
 	out_j["L"] = L;
 	out_j["total_dur"] = total_dur.count();
+	out_j["average_microseconds"] = double(total_dur.count())/n_iter;
 	out_j["p"] = p;
 	out_j["accuracy"] = double(acc)/n_iter;
 

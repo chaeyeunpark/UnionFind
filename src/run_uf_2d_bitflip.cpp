@@ -11,70 +11,6 @@
 #include "utility.hpp"
 #include "cpp_utils.hpp"
 
-
-void add_corrections(const int L, const std::vector<Edge>& corrections, 
-		Eigen::ArrayXi& error, ErrorType error_type)
-{
-	for(auto e: corrections)
-	{
-		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
-		error[idx] += 1;
-	}
-}
-
-template<typename Lattice>
-class LazyDecoder
-{
-private:
-	const Lattice lattice_;
-	std::vector<Edge> all_edges_;
-
-public:
-	template<typename ...Args>
-	LazyDecoder(Args&&... args)
-		: lattice_{args...}
-	{
-		const auto num_edges = lattice_.num_edges();
-
-		for(int i = 0; i < num_edges; ++i)
-		{
-			all_edges_.emplace_back(lattice_.to_edge(i));
-		}
-	}
-
-	std::pair<bool, std::vector<Edge>> decode(std::vector<int>& syndromes)
-	{
-		std::vector<Edge> corrections;
-
-		for(Edge edge: all_edges_)
-		{
-			if (syndromes[edge.u] == 1 && syndromes[edge.v] == 1)
-			{
-				corrections.emplace_back(std::move(edge));
-			}
-		}
-
-		for(const auto& edge: corrections)
-		{
-			syndromes[edge.u] ^= 1;
-			syndromes[edge.v] ^= 1;
-		}
-
-		bool success = true;
-
-		for(const auto syndrome: syndromes)
-		{
-			if(syndrome == 1)
-			{
-				success = false;
-				break;
-			}
-		}
-
-		return std::make_pair(success, corrections);
-	}
-};
-
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
@@ -113,7 +49,6 @@ int main(int argc, char* argv[])
 
 	int acc = 0;
 	
-	LazyDecoder<Lattice2D> lazy_decoder(L);
 	UnionFindDecoder<Lattice2D> decoder(L);
 	for(int n = 0; n < n_iter; ++n)
 	{
@@ -124,18 +59,10 @@ int main(int argc, char* argv[])
 
 		auto start = chrono::high_resolution_clock::now();
 		decoder.clear();
-
-		auto [success, decoding] = lazy_decoder.decode(synd_x);
-		if (!success)
-		{
-			auto decoding_uf =  decoder.decode(synd_x);
-			decoding.insert(decoding.end(), decoding_uf.begin(), decoding_uf.end());
-		}
+		auto decoding_x = decoder.decode(synd_x);
 		auto end = chrono::high_resolution_clock::now();
 
-		add_corrections(L, decoding, x_errors, ErrorType::X);
-		//add_corrections(L, decoding_z, z_errors, ErrorType::Z);
-
+		add_corrections(L, decoding_x, x_errors, ErrorType::X);
 
 		if((!logical_error(L, x_errors, ErrorType::X)))
 		{
@@ -150,7 +77,7 @@ int main(int argc, char* argv[])
 	}
 
 	char filename[255];
-	sprintf(filename, "out_lazy_L%02d_%04d.json", L, int(p*1000+0.5));
+	sprintf(filename, "out_L%02d_%04d.json", L, int(p*1000+0.5));
 	std::ofstream out_data(filename);
 	nlohmann::json out_j;
 	out_j["L"] = L;

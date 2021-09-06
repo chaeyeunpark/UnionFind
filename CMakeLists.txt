@@ -51,15 +51,19 @@ endif()
 if (BUILD_EXECUTABLE)
 	add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/error_utils.cpp")
 
-	add_executable(RunUnionFind2D "src/RunUnionFind2D.cpp" "src/utility.cpp" "src/error_utils.cpp")
-	target_link_libraries(RunUnionFind2D Eigen3::Eigen)
+	add_executable(run_uf_2d_bitflip "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_link_libraries(run_uf_2d_bitflip Eigen3::Eigen)
 
-	add_executable(RunUnionFind3D "src/RunUnionFind3D.cpp" "src/utility.cpp" "src/error_utils.cpp")
-	target_link_libraries(RunUnionFind3D Eigen3::Eigen)
+	add_executable(run_uf_2d_bitflip_lazy "src/run_uf_2d_bitflip_lazy.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_link_libraries(run_uf_2d_bitflip_lazy Eigen3::Eigen)
+
+	add_executable(run_uf_2d_depol "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_link_libraries(run_uf_2d_depol Eigen3::Eigen)
+
+	add_executable(run_uf_2d_depol_lazy "src/run_uf_2d_depol_lazy.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_link_libraries(run_uf_2d_depol_lazy Eigen3::Eigen)
 
 	if (MPI_FOUND)
-		add_executable(RunUnionFind3D_MPI "src/RunUnionFind3D_MPI.cpp" "src/utility.cpp" "src/error_utils.cpp")
-		target_link_libraries(RunUnionFind3D_MPI PRIVATE MPI::MPI_CXX Eigen3::Eigen)
 	endif ()
 endif()
 

@@ -158,7 +158,10 @@ void add_measurement_noise(const int L, RandomEngine& re,
 
 void layer_syndrome_diff(const int L, std::vector<int>& syndromes);
 
+
 bool has_logical_error(int L, Eigen::ArrayXi& error_total, 
 		const std::vector<Edge>& corrections, ErrorType error_type);
 
 
+void add_corrections(const int L, const std::vector<Edge>& corrections, 
+		Eigen::ArrayXi& error, ErrorType error_type);
