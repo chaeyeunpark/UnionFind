@@ -6,10 +6,11 @@
 #include <chrono>
 
 #include "Lattice2D.hpp"
+#include "LazyDecoder.hpp"
 #include "UnionFind.hpp"
 
 #include "utility.hpp"
-#include "cpp_utils.hpp"
+#include "error_utils.hpp"
 
 
 int main(int argc, char* argv[])

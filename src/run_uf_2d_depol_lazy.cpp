@@ -7,6 +7,7 @@
 
 #include "Lattice2D.hpp"
 #include "UnionFind.hpp"
+#include "LazyDecoder.hpp"
 
 #include "utility.hpp"
 #include "error_utils.hpp"
@@ -50,6 +51,7 @@ int main(int argc, char* argv[])
 
 	int acc = 0;
 	
+	LazyDecoder<Lattice2D> lazy_decoder(L);
 	UnionFindDecoder<Lattice2D> decoder(L);
 	for(int n = 0; n < n_iter; ++n)
 	{
@@ -64,7 +66,7 @@ int main(int argc, char* argv[])
 	
 		// Process lazy decoder
 		auto [success_x, decoding_x] = lazy_decoder.decode(synd_x);
-		if (!success)
+		if (!success_x)
 		{
 			decoder.clear();
 			auto decoding_uf =  decoder.decode(synd_x);
@@ -72,7 +74,7 @@ int main(int argc, char* argv[])
 		}
 
 		auto [success_z, decoding_z] = lazy_decoder.decode(synd_z);
-		if (!success)
+		if (!success_z)
 		{
 			decoder.clear();
 			auto decoding_uf =  decoder.decode(synd_x);
