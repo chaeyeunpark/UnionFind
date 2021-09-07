@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 		if (!success_z)
 		{
 			decoder.clear();
-			auto decoding_uf =  decoder.decode(synd_x);
+			auto decoding_uf =  decoder.decode(synd_z);
 			decoding_z.insert(decoding_z.end(), decoding_uf.begin(), decoding_uf.end());
 		}
 
