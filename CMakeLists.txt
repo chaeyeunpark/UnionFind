@@ -51,19 +51,42 @@ endif()
 if (BUILD_EXECUTABLE)
 	add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/error_utils.cpp")
 
+	# 2D Bitflip noise
 	add_executable(run_uf_2d_bitflip "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
 	target_link_libraries(run_uf_2d_bitflip Eigen3::Eigen)
 
-	add_executable(run_uf_2d_bitflip_lazy "src/run_uf_2d_bitflip_lazy.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	add_executable(run_uf_2d_bitflip_lazy "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_compile_definitions(run_uf_2d_bitflip_lazy PUBLIC USE_LAZY)
 	target_link_libraries(run_uf_2d_bitflip_lazy Eigen3::Eigen)
 
+	# 2D Depolarzing noise
 	add_executable(run_uf_2d_depol "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
 	target_link_libraries(run_uf_2d_depol Eigen3::Eigen)
 
-	add_executable(run_uf_2d_depol_lazy "src/run_uf_2d_depol_lazy.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	add_executable(run_uf_2d_depol_lazy "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	target_compile_definitions(run_uf_2d_depol_lazy PUBLIC USE_LAZY)
 	target_link_libraries(run_uf_2d_depol_lazy Eigen3::Eigen)
 
 	if (MPI_FOUND)
+		# 2D Bitflip noise with MPI
+		add_executable(run_uf_2d_bitflip_mpi "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		target_compile_definitions(run_uf_2d_bitflip_mpi PUBLIC USE_MPI)
+		target_link_libraries(run_uf_2d_bitflip_mpi Eigen3::Eigen MPI::MPI_CXX)
+
+		add_executable(run_uf_2d_bitflip_lazy_mpi "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		target_compile_definitions(run_uf_2d_bitflip_lazy_mpi PUBLIC USE_MPI
+			USE_LAZY)
+		target_link_libraries(run_uf_2d_bitflip_lazy_mpi Eigen3::Eigen MPI::MPI_CXX)
+
+		# 2D Depolarzing noise with MPI
+		add_executable(run_uf_2d_depol_mpi "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		target_compile_definitions(run_uf_2d_depol_mpi PUBLIC USE_MPI)
+		target_link_libraries(run_uf_2d_depol_mpi Eigen3::Eigen MPI::MPI_CXX)
+
+		add_executable(run_uf_2d_depol_lazy_mpi "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		target_compile_definitions(run_uf_2d_depol_lazy_mpi PUBLIC USE_MPI
+			USE_LAZY)
+		target_link_libraries(run_uf_2d_depol_lazy_mpi Eigen3::Eigen MPI::MPI_CXX)
 	endif ()
 endif()
 
