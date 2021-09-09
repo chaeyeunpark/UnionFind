@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "error_utils.hpp"
+#include "toric_utils.hpp"
 #include "utility.hpp"
 
 int main()

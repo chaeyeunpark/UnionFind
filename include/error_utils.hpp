@@ -5,34 +5,17 @@
 #include <Eigen/Dense>
 
 #include "utility.hpp"
-#include "LatticeCubic.hpp"
+
+/**
+ * This file contains <em>lattice independent</em> functions for generating
+ * qubit and syndrome measurement errors.
+ */
 
 enum class NoiseType
 {
 	Depolarizing = 0, Independent, X, Z
 };
 
-bool logical_error(const int L, const Eigen::ArrayXi& error, ErrorType error_type);
-
-std::vector<int> z_error_to_syndrome_x(const int L, const Eigen::ArrayXi& z_error);
-std::vector<int> x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_error);
-
-/*
- * if error_type is X, the output is error locations in the dual lattice.
- * @param	error	An array of length 2*L*L where element 1 indicates the error at the given index
- * */
-inline std::vector<int> errors_to_syndromes(const int L, 
-		const Eigen::ArrayXi& error, ErrorType error_type) 
-{
-	switch(error_type)
-	{
-	case ErrorType::X:
-		return x_error_to_syndrome_z(L, error);
-	case ErrorType::Z:
-		return z_error_to_syndrome_x(L, error);
-	}
-	return {};
-}
 
 template<class RandomEngine>
 auto create_errors(RandomEngine& re, const int num_qubits,
@@ -98,9 +81,8 @@ auto create_errors(RandomEngine& re, const int num_qubits,
 }
 
 template<class RandomEngine>
-auto create_measurement_errors(RandomEngine& re, 
-		const int num_qubits, const int repetition,
-		const double p, NoiseType noise_type)
+auto create_measurement_errors(RandomEngine& re, const int num_qubits, 
+		const int repetition, const double p, NoiseType noise_type)
 {
 	Eigen::ArrayXXi measurement_error_x = Eigen::ArrayXXi::Zero(num_qubits, repetition);
 	Eigen::ArrayXXi measurement_error_z = Eigen::ArrayXXi::Zero(num_qubits, repetition);
@@ -145,8 +127,6 @@ generate_errors(const int num_qubits, const int repetition,	double p,
 	return std::make_pair(qubit_errors_x, qubit_errors_z);
 }
 
-std::vector<int>
-calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors, ErrorType error_type);
 
 template<typename RandomEngine>
 void add_measurement_noise(const int L, RandomEngine& re, 
@@ -157,11 +137,3 @@ void add_measurement_noise(const int L, RandomEngine& re,
 }
 
 void layer_syndrome_diff(const int L, std::vector<int>& syndromes);
-
-
-bool has_logical_error(int L, Eigen::ArrayXi& error_total, 
-		const std::vector<Edge>& corrections, ErrorType error_type);
-
-
-void add_corrections(const int L, const std::vector<Edge>& corrections, 
-		Eigen::ArrayXi& error, ErrorType error_type);

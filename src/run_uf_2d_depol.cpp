@@ -11,9 +11,10 @@
 #include <mpi.h>
 #endif
 
-#include "error_utils.hpp"
 #include "Lattice2D.hpp"
 #include "UnionFind.hpp"
+#include "error_utils.hpp"
+#include "toric_utils.hpp"
 
 #ifdef USE_LAZY
 #pragma message ("Build with Lazy decoder")

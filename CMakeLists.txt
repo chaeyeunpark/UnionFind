@@ -18,9 +18,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(LINK_WHAT_YOU_USE TRUE)
 set(BUILD_RPATH_USE_ORIGIN TRUE)
 
-option(BUILD_EXECUTABLE "Build C++ executables" OFF)
+option(BUILD_EXECUTABLES "Build C++ executables" OFF)
 
-if(BUILD_EXECUTABLE)
+if(BUILD_EXECUTABLES)
 	find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 	find_package(MPI)
@@ -48,49 +48,52 @@ if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
 endif()
 
 
-if (BUILD_EXECUTABLE)
-	add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp" "src/utility.cpp" "src/error_utils.cpp")
+if (BUILD_EXECUTABLES)
+	add_library(toric_utils STATIC "src/error_utils.cpp" "src/toric_utils.cpp" "src/utility.cpp")
+
+	add_executable(TestGenerateSyndromes "Test/TestGenerateSyndromes.cpp")
+	target_link_libraries(TestGenerateSyndromes PRIVATE toric_utils)
 
 	# 2D Bitflip noise
-	add_executable(run_uf_2d_bitflip "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
-	target_link_libraries(run_uf_2d_bitflip Eigen3::Eigen)
+	add_executable(run_uf_2d_bitflip "src/run_uf_2d_bitflip.cpp")
+	target_link_libraries(run_uf_2d_bitflip PRIVATE toric_utils Eigen3::Eigen)
 
-	add_executable(run_uf_2d_bitflip_lazy "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	add_executable(run_uf_2d_bitflip_lazy "src/run_uf_2d_bitflip.cpp")
 	target_compile_definitions(run_uf_2d_bitflip_lazy PUBLIC USE_LAZY)
-	target_link_libraries(run_uf_2d_bitflip_lazy Eigen3::Eigen)
+	target_link_libraries(run_uf_2d_bitflip_lazy PRIVATE toric_utils Eigen3::Eigen)
 
 	# 2D Depolarzing noise
-	add_executable(run_uf_2d_depol "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
-	target_link_libraries(run_uf_2d_depol Eigen3::Eigen)
+	add_executable(run_uf_2d_depol "src/run_uf_2d_depol.cpp")
+	target_link_libraries(run_uf_2d_depol PRIVATE toric_utils Eigen3::Eigen)
 
-	add_executable(run_uf_2d_depol_lazy "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+	add_executable(run_uf_2d_depol_lazy "src/run_uf_2d_depol.cpp")
 	target_compile_definitions(run_uf_2d_depol_lazy PUBLIC USE_LAZY)
-	target_link_libraries(run_uf_2d_depol_lazy Eigen3::Eigen)
+	target_link_libraries(run_uf_2d_depol_lazy PRIVATE toric_utils Eigen3::Eigen)
 
 	# 3D Depolarizing noise
-	add_executable(run_uf_3d_depol "src/run_uf_3d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
-	target_link_libraries(run_uf_3d_depol Eigen3::Eigen)
+	add_executable(run_uf_3d_depol "src/run_uf_3d_depol.cpp")
+	target_link_libraries(run_uf_3d_depol PRIVATE toric_utils Eigen3::Eigen)
 
 	if (MPI_FOUND)
 		# 2D Bitflip noise with MPI
-		add_executable(run_uf_2d_bitflip_mpi "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		add_executable(run_uf_2d_bitflip_mpi "src/run_uf_2d_bitflip.cpp")
 		target_compile_definitions(run_uf_2d_bitflip_mpi PUBLIC USE_MPI)
-		target_link_libraries(run_uf_2d_bitflip_mpi Eigen3::Eigen MPI::MPI_CXX)
+		target_link_libraries(run_uf_2d_bitflip_mpi PRIVATE toric_utils Eigen3::Eigen MPI::MPI_CXX)
 
-		add_executable(run_uf_2d_bitflip_lazy_mpi "src/run_uf_2d_bitflip.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		add_executable(run_uf_2d_bitflip_lazy_mpi "src/run_uf_2d_bitflip.cpp")
 		target_compile_definitions(run_uf_2d_bitflip_lazy_mpi PUBLIC USE_MPI
 			USE_LAZY)
-		target_link_libraries(run_uf_2d_bitflip_lazy_mpi Eigen3::Eigen MPI::MPI_CXX)
+		target_link_libraries(run_uf_2d_bitflip_lazy_mpi PRIVATE toric_utils Eigen3::Eigen MPI::MPI_CXX)
 
 		# 2D Depolarzing noise with MPI
-		add_executable(run_uf_2d_depol_mpi "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		add_executable(run_uf_2d_depol_mpi "src/run_uf_2d_depol.cpp")
 		target_compile_definitions(run_uf_2d_depol_mpi PUBLIC USE_MPI)
-		target_link_libraries(run_uf_2d_depol_mpi Eigen3::Eigen MPI::MPI_CXX)
+		target_link_libraries(run_uf_2d_depol_mpi PRIVATE toric_utils Eigen3::Eigen MPI::MPI_CXX)
 
-		add_executable(run_uf_2d_depol_lazy_mpi "src/run_uf_2d_depol.cpp" "src/utility.cpp" "src/error_utils.cpp")
+		add_executable(run_uf_2d_depol_lazy_mpi "src/run_uf_2d_depol.cpp")
 		target_compile_definitions(run_uf_2d_depol_lazy_mpi PUBLIC USE_MPI
 			USE_LAZY)
-		target_link_libraries(run_uf_2d_depol_lazy_mpi Eigen3::Eigen MPI::MPI_CXX)
+		target_link_libraries(run_uf_2d_depol_lazy_mpi PRIVATE toric_utils Eigen3::Eigen MPI::MPI_CXX)
 	endif ()
 endif()
 

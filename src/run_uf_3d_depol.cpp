@@ -7,9 +7,10 @@
 
 #include <Eigen/Dense>
 
-#include "error_utils.hpp"
 #include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
+#include "error_utils.hpp"
+#include "toric_utils.hpp"
 
 void print_qubit_errors(const int L, const Eigen::ArrayXXi& qubit_errors)
 {
