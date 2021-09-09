@@ -11,7 +11,7 @@
 #include <mpi.h>
 #endif
 
-#include "Lattice2D.hpp"
+#include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
 #include "error_utils.hpp"
 #include "toric_utils.hpp"
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	namespace chrono = std::chrono;
 
 	const auto noise_type = NoiseType::X;
-	const uint32_t n_iter = 1'000'000;
+	const uint32_t n_iter = 1'000;
 
 	int mpi_rank = 0;
 	int mpi_size = 1;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
 	if(argc != 3)
 	{
-		printf("Usage: %s [L]\n", argv[0]);
+		printf("Usage: %s [L] [p]\n", argv[0]);
 		return 1;
 	}
 
@@ -71,16 +71,24 @@ int main(int argc, char* argv[])
 	uint32_t n_success = 0u;
 	chrono::microseconds node_dur{};
 #ifdef USE_LAZY
-	LazyDecoder<Lattice2D> lazy_decoder(L);
+	LazyDecoder<LatticeCubic> lazy_decoder(L);
 #endif
-	
-	UnionFindDecoder<Lattice2D> decoder(L);
+	LatticeCubic lattice(L);
+	UnionFindDecoder<LatticeCubic> decoder(L);
 	for(uint32_t k = mpi_rank; k < n_iter; k += mpi_size)
 	{
-		auto [x_errors, z_errors] = create_errors(re, decoder.num_edges(),
-				p, noise_type);
+		auto [error_x, error_z] = generate_errors(2*L*L, L, p, re, noise_type);
 
-		auto synd_x = errors_to_syndromes(L, x_errors, ErrorType::X);
+		auto synd_x = calc_syndromes(lattice, error_x, ErrorType::X);
+
+		Eigen::ArrayXi error_total_x = error_x.col(L-1);
+
+		const auto [measurement_error_x, measurement_error_z]
+			= create_measurement_errors(re, L*L, L, p, noise_type);
+		
+		add_measurement_noise(L, re, synd_x, measurement_error_x);
+
+		layer_syndrome_diff(L, synd_x);
 
 		auto start = chrono::high_resolution_clock::now();
 #ifdef USE_LAZY
@@ -95,15 +103,13 @@ int main(int argc, char* argv[])
 
 #else
 		decoder.clear();
-		auto decoding_x = decoder.decode(synd_x);
+		auto corrections_x = decoder.decode(synd_x);
 #endif
-
-		add_corrections(L, decoding_x, x_errors, ErrorType::X);
 		auto end = chrono::high_resolution_clock::now();
 
-		if(!logical_error(L, x_errors, ErrorType::X))
+		if(!has_logical_error(L, error_total_x, corrections_x, ErrorType::X))
 		{
-			++n_success;
+			++n_success ;
 		}
 
 		auto dur = chrono::duration_cast<chrono::microseconds> (end-start);

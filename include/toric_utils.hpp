@@ -3,7 +3,6 @@
 #include <Eigen/Dense>
 
 #include "utility.hpp"
-#include "LatticeCubic.hpp"
 
 /**
  * This file contains functions utility functions for the Toric code.
@@ -31,8 +30,6 @@ inline std::vector<int> errors_to_syndromes(const int L,
 }
 
 
-int decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type);
-
 constexpr int to_vertex_index(int L, const int row, const int col)
 {
 	return (((row + L) % L)) * L + (col + L) % L;
@@ -43,8 +40,27 @@ inline std::tuple<int, int> vertex_to_coord(const int L, const int vidx)
 	return std::make_tuple(vidx / L, vidx % L);
 }
 
+inline int to_edge_idx(const int L, const Edge e)
+{
+	if(is_horizontal(L, e))
+	{
+		auto u = left(L, e);
+		const auto [row, col] = vertex_to_coord(L, u);
+		return L*row + col + L*L;
+	}
+	else
+	{
+		auto u = upper(L, e);
+		const auto [row, col] = vertex_to_coord(L, u);
+		return L*row + col;
+	}
+}
+
+int decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type);
 
 Edge to_edge(const int L, int edge_index);
+
+class LatticeCubic; //forward def
 
 std::vector<int>
 calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors, ErrorType error_type);

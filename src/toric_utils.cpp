@@ -1,4 +1,5 @@
 #include "toric_utils.hpp"
+#include "LatticeCubic.hpp"
 
 std::vector<int> z_error_to_syndrome_x(const int L, const Eigen::ArrayXi& z_error) 
 {
@@ -49,7 +50,6 @@ std::vector<int> x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_erro
 
 int decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type)
 {
-	int idx = 0;
 	switch(error_type)
 	{
 	case ErrorType::X:
@@ -58,32 +58,18 @@ int decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type)
 		{
 			auto u = left(L, e);
 			const auto [row, col] = vertex_to_coord(L, u);
-			idx = L*((row+1) % L) + ((col+1) % L);
+			return L*((row+1) % L) + ((col+1) % L);
 		}
 		else
 		{
 			auto u = upper(L, e);
 			const auto [row, col] = vertex_to_coord(L, u);
-			idx = L*(row % L) + col + L*L;
+			return L*(row % L) + col + L*L;
 		}
-		break;
 	case ErrorType::Z:
-		//each edge in correction is a actual qubit
-		if(is_horizontal(L, e))
-		{
-			auto u = left(L, e);
-			const auto [row, col] = vertex_to_coord(L, u);
-			idx = L*row + col + L*L;
-		}
-		else
-		{
-			auto u = upper(L, e);
-			const auto [row, col] = vertex_to_coord(L, u);
-			idx = L*row + col;
-		}
-		break;
+		return to_edge_idx(L, e);
 	}
-	return idx;
+	__builtin_unreachable();
 }
 
 Edge to_edge(const int L, int edge_index) 

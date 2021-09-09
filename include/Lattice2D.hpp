@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility.hpp"
+#include "toric_utils.hpp"
 
 class Lattice2D
 {
@@ -51,9 +52,8 @@ public:
 
 	inline int edge_idx(const Edge& edge) const
 	{
-		return decoder_edge_to_qubit_idx(L_, edge, ErrorType::Z);
+		return to_edge_idx(L_, edge);
 	}
-
 
 	inline Edge to_edge(int edge_index) const
 	{

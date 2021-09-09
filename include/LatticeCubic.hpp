@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility.hpp"
+#include "toric_utils.hpp"
 #include "Lattice2D.hpp"
 
 class LatticeCubic
@@ -78,8 +79,7 @@ public:
 
 		if ((edge.u / (L*L)) == (edge.v / (L*L))) //edge is spacelike
 		{
-			return decoder_edge_to_qubit_idx(L, Edge{edge.u % (L*L), edge.v % (L*L)},
-					ErrorType::Z) + 3*L*L*uh;
+			return to_edge_idx(L, Edge{edge.u % (L*L), edge.v % (L*L)}) + 3*L*L*uh;
 		}
 
 		{//edge is in the time direction
