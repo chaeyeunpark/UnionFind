@@ -1,40 +1,5 @@
 #include "toric_utils.hpp"
 
-
-bool logical_error(const int L, const Eigen::ArrayXi& error, ErrorType error_type)
-{
-	//one may use a counting algorithm for testing logical error
-	int sum1 = 0;
-	int sum2 = 0;
-	switch(error_type)
-	{
-	case ErrorType::X:
-		//need to think in a dual lattice
-		for(int u = 0; u < L*L; u += L)
-		{
-			sum1 += error[u];
-		}
-		for(int u = L*L; u < L*L+L; ++u)
-		{
-			sum2 += error[u];
-		}
-		break;
-	case ErrorType::Z:
-		for(int u = 0; u < L; ++u)
-		{
-			sum1 += error[u];
-		}
-		for(int u = L*L; u < 2*L*L; u += L)
-		{
-			sum2 += error[u];
-		}
-		break;
-	}
-
-	return (sum1 % 2 == 1 ) || (sum2 % 2 == 1 );
-}
-
-
 std::vector<int> z_error_to_syndrome_x(const int L, const Eigen::ArrayXi& z_error) 
 {
 	std::vector<int> syndromes_array(L*L, 0u);
@@ -82,6 +47,59 @@ std::vector<int> x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_erro
 	return syndromes_array;
 }
 
+int decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type)
+{
+	int idx = 0;
+	switch(error_type)
+	{
+	case ErrorType::X:
+		//each edge is a qubit in the dual lattice
+		if(is_horizontal(L, e))
+		{
+			auto u = left(L, e);
+			const auto [row, col] = vertex_to_coord(L, u);
+			idx = L*((row+1) % L) + ((col+1) % L);
+		}
+		else
+		{
+			auto u = upper(L, e);
+			const auto [row, col] = vertex_to_coord(L, u);
+			idx = L*(row % L) + col + L*L;
+		}
+		break;
+	case ErrorType::Z:
+		//each edge in correction is a actual qubit
+		if(is_horizontal(L, e))
+		{
+			auto u = left(L, e);
+			const auto [row, col] = vertex_to_coord(L, u);
+			idx = L*row + col + L*L;
+		}
+		else
+		{
+			auto u = upper(L, e);
+			const auto [row, col] = vertex_to_coord(L, u);
+			idx = L*row + col;
+		}
+		break;
+	}
+	return idx;
+}
+
+Edge to_edge(const int L, int edge_index) 
+{
+	int row = edge_index / L; // % L is done in to_vertex_index
+	int col = edge_index % L;
+	if((edge_index / (L*L)) == 0) //vertical edge
+	{
+		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row-1, col));
+	}
+	else //horizontal edge
+	{
+		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row, col+1));
+	}
+}
+
 std::vector<int>
 calc_syndromes(const LatticeCubic& lattice, 
 		const Eigen::ArrayXXi& errors, ErrorType error_type)
@@ -109,6 +127,51 @@ calc_syndromes(const LatticeCubic& lattice,
 	return syndromes;
 }
 
+void add_corrections(const int L, const std::vector<Edge>& corrections, 
+		Eigen::ArrayXi& error, ErrorType error_type)
+{
+	for(auto e: corrections)
+	{
+		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
+		error[idx] += 1;
+	}
+}
+
+
+bool logical_error(const int L, const Eigen::ArrayXi& error, ErrorType error_type)
+{
+	//one may use a counting algorithm for testing logical error
+	int sum1 = 0;
+	int sum2 = 0;
+	switch(error_type)
+	{
+	case ErrorType::X:
+		//need to think in a dual lattice
+		for(int u = 0; u < L*L; u += L)
+		{
+			sum1 += error[u];
+		}
+		for(int u = L*L; u < L*L+L; ++u)
+		{
+			sum2 += error[u];
+		}
+		break;
+	case ErrorType::Z:
+		for(int u = 0; u < L; ++u)
+		{
+			sum1 += error[u];
+		}
+		for(int u = L*L; u < 2*L*L; u += L)
+		{
+			sum2 += error[u];
+		}
+		break;
+	}
+
+	return (sum1 % 2 == 1 ) || (sum2 % 2 == 1 );
+}
+
+
 bool has_logical_error(int L, Eigen::ArrayXi& error_total, 
 		const std::vector<Edge>& corrections, ErrorType error_type)
 {
@@ -125,12 +188,3 @@ bool has_logical_error(int L, Eigen::ArrayXi& error_total,
 }
 
 
-void add_corrections(const int L, const std::vector<Edge>& corrections, 
-		Eigen::ArrayXi& error, ErrorType error_type)
-{
-	for(auto e: corrections)
-	{
-		auto idx = decoder_edge_to_qubit_idx(L, e, error_type);
-		error[idx] += 1;
-	}
-}
