@@ -78,6 +78,14 @@ if (BUILD_EXECUTABLES)
 	target_compile_definitions(run_uf_2d_bitflip_lazy PUBLIC USE_LAZY)
 	target_link_libraries(run_uf_3d_bitflip_lazy PRIVATE toric_utils Eigen3::Eigen)
 
+	# 3D Depolarizing noise
+	add_executable(run_uf_3d_depol "src/run_uf_3d_depol.cpp")
+	target_link_libraries(run_uf_3d_depol PRIVATE toric_utils Eigen3::Eigen)
+
+	add_executable(run_uf_3d_depol_lazy "src/run_uf_3d_depol.cpp")
+	target_compile_definitions(run_uf_2d_depol_lazy PUBLIC USE_LAZY)
+	target_link_libraries(run_uf_3d_depol_lazy PRIVATE toric_utils Eigen3::Eigen)
+
 	if (MPI_FOUND)
 		# 2D Bitflip noise with MPI
 		add_executable(run_uf_2d_bitflip_mpi "src/run_uf_2d_bitflip.cpp")
