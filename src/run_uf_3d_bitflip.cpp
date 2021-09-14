@@ -2,34 +2,43 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
-#include <atomic>
 #include <chrono>
 
 #include <Eigen/Dense>
 
-#include <sstream>
-
+#ifdef USE_MPI
+#pragma message ("Build with MPI")
 #include <mpi.h>
+#endif
 
-#include "error_utils.hpp"
 #include "LatticeCubic.hpp"
 #include "UnionFind.hpp"
+#include "error_utils.hpp"
+#include "toric_utils.hpp"
+
+#ifdef USE_LAZY
+#pragma message ("Build with Lazy decoder")
+#include "LazyDecoder.hpp"
+#endif
 
 int main(int argc, char* argv[])
 {
 	namespace chrono = std::chrono;
 
-	int mpi_rank, mpi_size;
+	const auto noise_type = NoiseType::X;
+	const uint32_t n_iter = 1'000'000;
 
+	int mpi_rank = 0;
+	int mpi_size = 1;
+
+#ifdef USE_MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
-
-	auto noise_type = NoiseType::Depolarizing;
-
 
 	if(argc != 3)
 	{
@@ -37,9 +46,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	const uint32_t n_iter = 10'000'000;
-	//const uint32_t n_iter = 960*100;
-	//const uint32_t n_iter = 960*5;
 	int L;
 	double p;
 
@@ -58,41 +64,50 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+#ifdef USE_MPI
 	fprintf(stderr, "Processing at rank = %d, size = %d\n", mpi_rank, mpi_size);
+#endif
 
 	uint32_t n_success = 0u;
-	chrono::microseconds node_dur;
-	LatticeCubic lattice{L};
+	chrono::microseconds node_dur{};
+#ifdef USE_LAZY
+	LazyDecoder<LatticeCubic> lazy_decoder(L);
+#endif
+	LatticeCubic lattice(L);
 	UnionFindDecoder<LatticeCubic> decoder(L);
 	for(uint32_t k = mpi_rank; k < n_iter; k += mpi_size)
 	{
-		auto [error_x, error_z] = 
-			generate_errors(2*L*L, L, p, re, noise_type);
+		auto [error_x, error_z] = generate_errors(2*L*L, L, p, re, noise_type);
 
 		auto synd_x = calc_syndromes(lattice, error_x, ErrorType::X);
-		auto synd_z = calc_syndromes(lattice, error_z, ErrorType::Z);
 
 		Eigen::ArrayXi error_total_x = error_x.col(L-1);
-		Eigen::ArrayXi error_total_z = error_z.col(L-1);
 
 		const auto [measurement_error_x, measurement_error_z]
 			= create_measurement_errors(re, L*L, L, p, noise_type);
 		
 		add_measurement_noise(L, re, synd_x, measurement_error_x);
-		add_measurement_noise(L, re, synd_z, measurement_error_z);
 
 		layer_syndrome_diff(L, synd_x);
-		layer_syndrome_diff(L, synd_z);
 
 		auto start = chrono::high_resolution_clock::now();
+#ifdef USE_LAZY
+		// Process lazy decoder
+		auto [success_x, decoding_x] = lazy_decoder.decode(synd_x);
+		if (!success_x)
+		{
+			decoder.clear();
+			auto decoding_uf =  decoder.decode(synd_x);
+			decoding_x.insert(decoding_x.end(), decoding_uf.begin(), decoding_uf.end());
+		}
+
+#else
 		decoder.clear();
 		auto corrections_x = decoder.decode(synd_x);
-		decoder.clear();
-		auto corrections_z = decoder.decode(synd_z);
+#endif
 		auto end = chrono::high_resolution_clock::now();
 
-		if((!has_logical_error(L, error_total_x, corrections_x, ErrorType::X)) &&
-				(!has_logical_error(L, error_total_z, corrections_z, ErrorType::Z)))
+		if(!has_logical_error(L, error_total_x, corrections_x, ErrorType::X))
 		{
 			++n_success ;
 		}
@@ -100,6 +115,8 @@ int main(int argc, char* argv[])
 		auto dur = chrono::duration_cast<chrono::microseconds> (end-start);
 		node_dur += dur;
 	}
+
+#ifdef USE_MPI
 	MPI_Barrier(MPI_COMM_WORLD);
 	
 	int64_t dur_in_microseconds = node_dur.count();
@@ -107,9 +124,15 @@ int main(int argc, char* argv[])
 	MPI_Allreduce(&dur_in_microseconds, &total_dur_in_microseconds,
 			1, MPI_LONG, MPI_SUM, MPI_COMM_WORLD);
 
+	printf("rank: %d, dur_in_microseconds: %ld, total_dur_in_microsecond: %ld\n", 
+			mpi_rank, dur_in_microseconds, total_dur_in_microseconds);
+
 	uint32_t total_success = 0;
 	MPI_Allreduce(&n_success, &total_success, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-
+#else
+	uint64_t total_dur_in_microseconds = node_dur.count();
+	uint32_t total_success = n_success;
+#endif
 
 	if(mpi_rank == 0)
 	{
@@ -125,6 +148,8 @@ int main(int argc, char* argv[])
 		out_data << out_j.dump(0);
 	}
 
+#ifdef USE_MPI
 	MPI_Finalize();
+#endif
 	return 0;
 }
