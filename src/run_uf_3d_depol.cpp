@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	namespace chrono = std::chrono;
 
 	const auto noise_type = NoiseType::Depolarizing;
-	const uint32_t n_iter = 10'000;
+	const uint32_t n_iter = 1'000'000;
 
 	int mpi_rank = 0;
 	int mpi_size = 1;
@@ -98,20 +98,20 @@ int main(int argc, char* argv[])
 		auto start = chrono::high_resolution_clock::now();
 #ifdef USE_LAZY
 		// Process lazy decoder
-		auto [success_x, decoding_x] = lazy_decoder.decode(synd_x);
+		auto [success_x, corrections_x] = lazy_decoder.decode(synd_x);
 		if (!success_x)
 		{
 			decoder.clear();
-			auto decoding_uf =  decoder.decode(synd_x);
-			decoding_x.insert(decoding_x.end(), decoding_uf.begin(), decoding_uf.end());
+			auto corrections_uf =  decoder.decode(synd_x);
+			corrections_x.insert(corrections_x.end(), corrections_uf.begin(), corrections_uf.end());
 		}
 
-		auto [success_z, decoding_z] = lazy_decoder.decode(synd_z);
+		auto [success_z, corrections_z] = lazy_decoder.decode(synd_z);
 		if (!success_z)
 		{
 			decoder.clear();
-			auto decoding_uf =  decoder.decode(synd_z);
-			decoding_z.insert(decoding_z.end(), decoding_uf.begin(), decoding_uf.end());
+			auto corrections_uf =  decoder.decode(synd_z);
+			corrections_z.insert(corrections_z.end(), corrections_uf.begin(), corrections_uf.end());
 		}
 
 #else

@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	namespace chrono = std::chrono;
 
 	const auto noise_type = NoiseType::X;
-	const uint32_t n_iter = 1'000;
+	const uint32_t n_iter = 1'000'000;
 
 	int mpi_rank = 0;
 	int mpi_size = 1;
