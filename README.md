@@ -40,6 +40,13 @@ decoder.decode(syndromes) # syndromes is a list of size L^2
 decoder.clear() # should be called for reuse
 ```
 
+You can also compile binary executables:
+```bash
+cmake -DBUILD_EXECUTABLES=ON ..
+make all
+```
+
+This builds the toric code examples with and without syndrome measurement errors for the bit-flip and depolarizing noise models. If MPI is found, the MPI version of code is also compiled.
 
 
 ## Notes
