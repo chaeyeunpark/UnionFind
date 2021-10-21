@@ -8,6 +8,7 @@ Based on a Python implementation by Kai Meinerz.
 
 Under the LGPL lisence. 
 
+This repository includes codes for [arXiv:2101.07285](https://arxiv.org/abs/2101.07285) which explores a machine learning assisted preprocessing combined with conventional decoders such as minimum-weight perfect matching (MWPM) and the Union-Find decoder. 
 
 ## Implementation detail
 Our implementation mostly follows the original paper but slightly differs in the implementation of peeling decoder. 
@@ -68,3 +69,4 @@ When you cite this repository, please use the following:
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/chaeyeunpark/UnionFind}}
 }
+
