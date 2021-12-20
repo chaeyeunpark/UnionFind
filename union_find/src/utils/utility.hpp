@@ -88,5 +88,3 @@ inline int right(int L, Edge e) // works only when horizontal
 	else
 		return e.u;
 }
-
-

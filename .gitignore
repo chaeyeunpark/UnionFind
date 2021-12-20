@@ -5,3 +5,4 @@ externals/*
 *.so
 *__pycache__*
 rel_with_dbg_info/
+build/*

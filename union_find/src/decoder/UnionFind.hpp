@@ -6,7 +6,6 @@
 #include <map>
 #include <queue>
 #include <algorithm>
-#include <nlohmann/json.hpp>
 
 #include <iostream>
 
@@ -16,8 +15,9 @@
 #include "utility.hpp"
 #include "RootManager.hpp"
 
+#include "LatticeConcept.hpp"
 
-template<class Lattice>
+template<LatticeConcept Lattice>
 class UnionFindDecoder
 {
 public:
@@ -252,8 +252,6 @@ public:
 		return lattice_.edge_idx(edge);
 	}
 
-
-
 	void clear()
 	{
 		std::deque<Edge>().swap(fuse_list_);
@@ -264,19 +262,5 @@ public:
 				border_vertices_);
 
 		std::deque<Edge>().swap(peeling_edges_);
-	}
-
-	nlohmann::json clusters()
-	{
-		std::map<Vertex, std::vector<Vertex>> cluster;
-		for(Vertex v = 0; v < lattice_.num_vertices(); ++v)
-		{
-			Vertex root = find_root(v);
-			if(mgr_.size(root) != 0)
-			{
-				cluster[root].emplace_back(v);
-			}
-		}
-		return cluster;
 	}
 };
