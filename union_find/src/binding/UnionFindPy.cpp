@@ -1,10 +1,12 @@
-#include <stdexcept>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include "UnionFind.hpp"
 #include "Lattice2D.hpp"
 #include "LatticeCubic.hpp"
+
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 #include "pybind11/numpy.h"
+
+#include <stdexcept>
 
 namespace py = pybind11;
 
@@ -14,7 +16,7 @@ void free_int_arr(void* p)
 	delete[] p_int;
 }
 
-PYBIND11_MODULE(union_find, m)
+PYBIND11_MODULE(union_find_py, m)
 {
 using UnionFindToric = UnionFindDecoder<Lattice2D>;
 py::class_<UnionFindToric>(m, "UnionFindToric")
