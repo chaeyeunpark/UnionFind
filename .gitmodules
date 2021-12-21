@@ -1,6 +1,6 @@
 [submodule "pybind11"]
-	path = union_find/src/externals/pybind11
+	path = union_find/cpp/externals/pybind11
 	url = https://github.com/pybind/pybind11.git
 [submodule "robin-map"]
-	path = union_find/src/externals/robin-map
+	path = union_find/cpp/externals/robin-map
 	url = https://github.com/Tessil/robin-map.git

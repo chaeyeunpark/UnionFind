@@ -30,8 +30,6 @@
 #include <queue>
 #include <algorithm>
 
-#include <iostream>
-
 namespace UnionFindCPP
 {
 template<LatticeConcept Lattice>

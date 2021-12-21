@@ -6,9 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils import repetition_code, toric_code_x_logicals, toric_code_x_stabilisers
-from union_find import UnionFindToric
 
-
+"""
 def num_decoding_failures(L, H, logicals, p, num_trials):
     decoder = UnionFindToric(L)
     num_errors = 0
@@ -21,7 +20,11 @@ def num_decoding_failures(L, H, logicals, p, num_trials):
         if np.any(error@logicals.T % 2):
             num_errors += 1
     return num_errors
+"""
 
 if __name__ == '__main__':
-    print(toric_code_x_stabilisers(4))
-
+    m = toric_code_x_stabilisers(4)
+    print(m.shape)
+    print(m.indices)
+    print(m.indptr)
+    

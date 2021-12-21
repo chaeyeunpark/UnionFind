@@ -44,7 +44,7 @@ private:
 
 	tsl::robin_map<Edge, int> edge_idx_;
 
-	void construct_connections(size_t num_qubits, size_t num_parity, [[maybe_unused]] size_t nnz, 
+	void construct_connections(size_t num_parity, size_t num_qubits, [[maybe_unused]] size_t nnz, 
 			int* col_indices, int* indptr)
 	{
 		for(size_t p_idx = 0; p_idx < num_parity; ++p_idx)
@@ -80,18 +80,18 @@ public:
 	/**
 	 * @breif construct a Lattice class from a given parity matrix (CSR format)
 	 *
+	 * @param num_parity total number of parities. Same as the number of rows of the matrix.
 	 * @param num_qubits total number of qubits. Same as the number of columns of the matrix
-	 * @param num_parity total number of parities. Same as the number of roww of the matrix.
 	 * @param nnz total number of non-zero values
 	 * @param data pointer for the matrix
 	 * @param col_indices indices[idx] indicate the column index of the element data[idx]
 	 * @param indptr indptr[row+1]-indptr[row] indicate the number of elements in the row
 	 */
-	LatticeFromParity(int num_qubits, int num_parity, size_t nnz, 
+	LatticeFromParity(int num_parity, int num_qubits, size_t nnz, 
 			int* col_indices, int* indptr)
 		: num_vertices_{num_parity}, num_edges_{num_qubits}
 	{
-		construct_connections(num_qubits, num_parity, nnz, col_indices, indptr);
+		construct_connections(num_parity, num_qubits, nnz, col_indices, indptr);
 	}
 
 	const std::vector<int>& vertex_connections(int v) const

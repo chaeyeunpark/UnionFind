@@ -14,6 +14,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
+
 #include "Decoder.hpp"
 #include "LatticFromParity.hpp"
 
@@ -31,10 +32,10 @@ void free_int_arr(void* p)
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(union_find_py, m)
+PYBIND11_MODULE(_union_find_py, m)
 {
 using UnionFindFromParity = UnionFindCPP::Decoder<UnionFindCPP::LatticeFromParity>;
-py::class_<UnionFindFromParity>(m, "UnionFind")
+py::class_<UnionFindFromParity>(m, "DecoderFromParity")
 	.def(py::init(
 		[](int num_qubits, int num_parity, int nnz, py::array_t<int> col_indices,
 			py::array_t<int> indptr)
