@@ -33,7 +33,7 @@ option(BUILD_EXECUTABLES "Build C++ executables" OFF)
 option(BUILD_TESTS "Build C++ tests" OFF)
 
 
-add_subdirectory(union_find/src)
+add_subdirectory(union_find/src "${CMAKE_BINARY_DIR}")
 
 if(BUILD_TESTS)
 	enable_testing()

@@ -1,4 +1,27 @@
+// Copyright (C) 2021 UnionFind++ authors
+//
+// This file is part of UnionFind++.
+// 
+// UnionFind++ is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// UnionFind++ is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
+#include "utility.hpp"
+#include "RootManager.hpp"
+#include "LatticeConcept.hpp"
+
+#include <tsl/robin_set.h>
+#include <tsl/robin_map.h>
+
 #include <cstdint>
 #include <vector>
 #include <array>
@@ -9,16 +32,10 @@
 
 #include <iostream>
 
-#include <tsl/robin_set.h>
-#include <tsl/robin_map.h>
-
-#include "utility.hpp"
-#include "RootManager.hpp"
-
-#include "LatticeConcept.hpp"
-
+namespace UnionFindCPP
+{
 template<LatticeConcept Lattice>
-class UnionFindDecoder
+class Decoder
 {
 public:
 	using Vertex = int;
@@ -29,7 +46,8 @@ private:
 
 	/* index: vertex */
 	std::vector<Vertex> connection_counts_;
-	std::vector<int> support_;
+
+	std::vector<int> support_; // Basically can be a map from Edge to int
 	std::deque<Edge> fuse_list_;
 
 	/* index: vertex */
@@ -206,7 +224,7 @@ private:
 
 public:
 	template<typename ...Args>
-	UnionFindDecoder(Args&&... args)
+	Decoder(Args&&... args)
 		: lattice_{args...}
 	{
 	}
@@ -264,3 +282,4 @@ public:
 		std::deque<Edge>().swap(peeling_edges_);
 	}
 };
+} // namespace UnionFindCPP
