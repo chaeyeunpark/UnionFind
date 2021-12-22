@@ -105,8 +105,7 @@ TEST_CASE("Test whether the constructed lattice is correct with a toric code",
 			}
 		}
 
-		auto lattice = LatticeFromParity(Lx * Ly, 2 * Lx * Ly, 4 * Lx * Ly,
-										 col_indices.data(), indptr.data());
+		auto lattice = LatticeFromParity(Lx * Ly, 2 * Lx * Ly, col_indices.data(), indptr.data());
 		REQUIRE(has_same_elts(lattice.vertex_connections(0), {1, 3, 4}));
 		REQUIRE(has_same_elts(lattice.vertex_connections(1), {0, 2, 5}));
 		REQUIRE(has_same_elts(lattice.vertex_connections(2), {1, 3, 6}));
@@ -138,8 +137,7 @@ TEST_CASE("Test whether the constructed lattice is correct with a toric code",
 								   std::make_move_iterator(m.end()));
 			}
 		}
-		auto lattice = LatticeFromParity(L * L, 2 * L * L, 4 * L * L, col_indices.data(),
-										 indptr.data());
+		auto lattice = LatticeFromParity(L * L, 2 * L * L, col_indices.data(), indptr.data());
 
 		std::uniform_int_distribution<int> col_dist(0, L - 1);
 		for(int row = 0; row < L; ++row)

@@ -5,4 +5,4 @@ debug*
 *__pycache__*
 rel_with_dbg_info/
 build/*
-UnionFindCPP.egg-info
+UnionFindPy.egg-info

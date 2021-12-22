@@ -27,7 +27,12 @@ endif()
 
 ## Process CLANG_TIDY
 if (CLANG_TIDY)
-    set(CMAKE_CXX_CLANG_TIDY clang-tidy --header-filter="${PROJECT_SOURCE_DIR}/include/.*" --extra-arg=-std=c++20)
+    message(STATUS "Use Clang-Tidy")
+    execute_process(
+        COMMAND            ${PROJECT_SOURCE_DIR}/build_utils/cpp_files.py --include-examples --include-tests --exclude-binding
+        WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE    UNIONFINDCPP_SOURCE_FILES)
+    set(CMAKE_CXX_CLANG_TIDY clang-tidy-12;--line-filter=${UNIONFINDCPP_SOURCE_FILES};--extra-arg=-std=c++20)
 endif()
 
 ################################################################################
@@ -38,7 +43,7 @@ set(JSON_DOWNLOAD_DIR "${PROJECT_SOURCE_DIR}/externals/nlohmann")
 set(JSON_DOWNLOAD_PATH "${JSON_DOWNLOAD_DIR}/json.hpp")
 
 if (NOT EXISTS "${JSON_DOWNLOAD_PATH}")
-    message("Downloading nlohmann/json.")
+    message(STATUS "Downloading nlohmann/json.")
     file(MAKE_DIRECTORY "${JSON_DOWNLOAD_DIR}")
     file(DOWNLOAD "${JSON_URL}" "${JSON_DOWNLOAD_PATH}" STATUS JSON_DOWNLOAD_STATUS)
 
@@ -60,7 +65,7 @@ set(CATCH_DOWNLOAD_DIR "${PROJECT_SOURCE_DIR}/externals")
 set(CATCH_DOWNLOAD_PATH "${CATCH_DOWNLOAD_DIR}/catch.hpp")
 
 if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
-    message("Downloading Catch2.")
+    message(STATUS "Downloading Catch2.")
     file(DOWNLOAD "${CATCH_URL}" "${CATCH_DOWNLOAD_PATH}" STATUS CATCH_DOWNLOAD_STATUS)
 
     # Separate the returned status code, and error message.

@@ -24,24 +24,29 @@
 
 #include <stdexcept>
 
+// NOLINTBEGIN(cppcoreguidelines-*)
 void free_int_arr(void* p)
 {
 	int* p_int = reinterpret_cast<int*>(p);
 	delete[] p_int;
 }
+// NOLINTEND(cppcoreguidelines-*)
 
 namespace py = pybind11;
 
+
+// NOLINTNEXTLINE(cppcoreguidelines-*)
 PYBIND11_MODULE(_union_find_py, m)
 {
 	using UnionFindFromParity = UnionFindCPP::Decoder<UnionFindCPP::LatticeFromParity>;
 	py::class_<UnionFindFromParity>(m, "DecoderFromParity")
 		.def(py::init(
-			[](int num_qubits, int num_parity, int nnz, py::array_t<int> col_indices,
-			   py::array_t<int> indptr)
+			[](int num_parities, int num_qubits, 
+				py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
+				py::array_t<int, py::array::c_style | py::array::forcecast> indptr)
 			{
 				// check the given dimension is correct
-				return UnionFindFromParity(num_qubits, num_parity, nnz,
+				return UnionFindFromParity(num_parities, num_qubits,
 										   static_cast<int*>(col_indices.request().ptr),
 										   static_cast<int*>(indptr.request().ptr));
 			}))

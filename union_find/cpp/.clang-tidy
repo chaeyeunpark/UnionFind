@@ -1,6 +1,8 @@
 ---
-Checks:          '*,-fuchsia-default-arguments-calls,-fuchsia-trailing-return,-fuchsia-overloaded-operator,-google-runtime-references,-google-runtime-int'
-WarningsAsErrors: '*,-clang-diagnostic-#pragma-messages'
-HeaderFilterRegex: ''
+Checks:          '*,-fuchsia-default-arguments-calls,-fuchsia-trailing-return,-fuchsia-overloaded-operator,-google-runtime-references,-google-runtime-int,-llvmlibc-*,-readability-function-cognitive-complexity'
+WarningsAsErrors: '*,-clang-diagnostic-#pragma-messages,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions'
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
+CheckOptions:
+  - key:   readability-function-cognitive-complexity.IgnoreMacros # from clang-tidy-14
+    value: true

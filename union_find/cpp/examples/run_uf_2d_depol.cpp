@@ -66,7 +66,7 @@ auto main(int argc, char* argv[]) -> int
 
 	if(argc != 3)
 	{
-		fmt::print("Usage: {} [L]\n", args[0]);
+		fmt::print("Usage: {} L p\n", args[0]);
 		return 1;
 	}
 

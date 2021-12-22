@@ -2,7 +2,7 @@ project(UnionFindCPP_examples)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-add_subdirectory(fmt)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 find_package(MPI)
 if(MPI_FOUND)

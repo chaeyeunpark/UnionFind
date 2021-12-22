@@ -48,7 +48,7 @@ private:
 	tsl::robin_map<Edge, int> edge_idx_;
 
 	void construct_connections(size_t num_parities, size_t num_qubits,
-							   [[maybe_unused]] size_t nnz, int* col_indices, int* indptr)
+							   int* col_indices, int* indptr)
 	{
 		qubit_parities_.resize(num_qubits);
 		for(size_t p_idx = 0; p_idx < num_parities; ++p_idx)
@@ -90,15 +90,14 @@ public:
 	 * matrix.
 	 * @param num_qubits total number of qubits. Same as the number of columns of the
 	 * matrix
-	 * @param nnz total number of non-zero values
 	 * @param col_indices indices[idx] indicate the column index of the element data[idx]
 	 * @param indptr indptr[row+1]-indptr[row] indicate the number of elements in the row
 	 */
-	LatticeFromParity(int num_parities, int num_qubits, size_t nnz, int* col_indices,
+	LatticeFromParity(int num_parities, int num_qubits, int* col_indices,
 					  int* indptr)
 		: num_vertices_{num_parities}, num_edges_{num_qubits}
 	{
-		construct_connections(num_parities, num_qubits, nnz, col_indices, indptr);
+		construct_connections(num_parities, num_qubits, col_indices, indptr);
 	}
 
 	const std::vector<int>& vertex_connections(int v) const

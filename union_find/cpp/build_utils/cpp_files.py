@@ -5,7 +5,7 @@ import sys
 import os
 
 FILE_EXTENSIONS = ['.hpp', '.cpp']
-SOURCE_DIRS = ['binding',  'include', 'src']
+SOURCE_DIRS = set(['binding',  'include', 'src'])
 EXCLUDE_DIRS = []
 PROJECT_SOURCE_DIR = Path(__file__).parent.parent.resolve()
 
@@ -14,10 +14,15 @@ if __name__ == '__main__':
     include_tests = False
 
     for arg in sys.argv[1:]:
-        if arg == '--include-examples':
-            SOURCE_DIRS += ['examples']
-        if arg == '--include-tests':
-            SOURCE_DIRS += ['tests']
+        if arg.startswith('--include-'):
+            dirname = arg[10:]
+            SOURCE_DIRS.add(dirname)
+        elif arg.startswith('--exclude-'):
+            dirname = arg[10:]
+            SOURCE_DIRS.discard(dirname)
+        else:
+            print(f"Given argument {arg} is not supported.")
+            sys.exit(1)
 
 
     file_list = []

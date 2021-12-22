@@ -14,39 +14,48 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
-#include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
-#include <random>
-
-#include <chrono>
+#include "Decoder.hpp"
+#include "LatticeCubic.hpp"
+#include "LazyDecoder.hpp"
+#include "error_utils.hpp"
+#include "toric_utils.hpp"
 
 #include <Eigen/Dense>
-
+#include <fmt/core.h>
 #ifdef USE_MPI
 #pragma message("Build with MPI")
 #include <mpi.h>
 #endif
+#include <nlohmann/json.hpp>
 
-#include "LatticeCubic.hpp"
-#include "UnionFind.hpp"
-#include "error_utils.hpp"
-#include "toric_utils.hpp"
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <span>
 
-#ifdef USE_LAZY
-#pragma message("Build with Lazy decoder")
-#include "LazyDecoder.hpp"
-#endif
-
-int main(int argc, char* argv[])
+// NOLINTNEXTLINE(bugprone-exception-escape)
+auto main(int argc, char* argv[]) -> int
 {
 	namespace chrono = std::chrono;
+	using UnionFindCPP::Decoder, UnionFindCPP::ErrorType, UnionFindCPP::LatticeCubic,
+		UnionFindCPP::LazyDecoder, UnionFindCPP::NoiseType,
+		UnionFindCPP::add_measurement_noise, UnionFindCPP::add_corrections,
+		UnionFindCPP::layer_syndrome_diff;
 
+	auto args = std::span(argv, size_t(argc));
 	const auto noise_type = NoiseType::Depolarizing;
 	const uint32_t n_iter = 1'000'000;
 
 	int mpi_rank = 0;
 	int mpi_size = 1;
+
+	constexpr int p_precision = 5;
+	auto p_format = [](double p) -> long
+	{
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+		return std::lround(p * std::pow(10, p_precision));
+	};
 
 #ifdef USE_MPI
 	MPI_Init(&argc, &argv);
@@ -59,33 +68,41 @@ int main(int argc, char* argv[])
 
 	if(argc != 3)
 	{
-		printf("Usage: %s [L] [p]\n", argv[0]);
+		fmt::print("Usage: {} L p\n", args[0]);
 		return 1;
 	}
 
-	int L;
-	double p;
+	int L = 0;
+	double p = 0.0;
 
-	sscanf(argv[1], "%d", &L);
-	sscanf(argv[2], "%lf", &p);
+	try
+	{
+		L = std::stoi(args[1]);
+		p = std::stod(args[2]);
+	}
+	catch(std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 
 	if(L < 0)
 	{
-		printf("Error: L must be positive\n");
+		fmt::print("Error: L must be positive\n");
 		return 1;
 	}
 
 	if(!((p > 0.0) && (p < 1.0)))
 	{
-		printf("Error: p must be in between 0.0 and 1.0\n");
+		fmt::print("Error: p must be in between 0.0 and 1.0\n");
 		return 1;
 	}
 
 #ifdef USE_MPI
-	fprintf(stderr, "Processing at rank = %d, size = %d\n", mpi_rank, mpi_size);
+	fmt::print(stderr, "Processing at rank = {}, size = {}\n", mpi_rank, mpi_size);
 #endif
 
-	uint32_t n_success = 0u;
+	unsigned int n_success = 0U;
 	chrono::microseconds node_dur{};
 #ifdef USE_LAZY
 	LazyDecoder<LatticeCubic> lazy_decoder(L);
@@ -153,25 +170,25 @@ int main(int argc, char* argv[])
 #ifdef USE_MPI
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	int64_t dur_in_microseconds = node_dur.count();
-	int64_t total_dur_in_microseconds = 0;
-	MPI_Allreduce(&dur_in_microseconds, &total_dur_in_microseconds, 1, MPI_LONG, MPI_SUM,
-				  MPI_COMM_WORLD);
+	unsigned long dur_in_microseconds = node_dur.count();
+	unsigned long total_dur_in_microseconds = 0;
+	MPI_Allreduce(&dur_in_microseconds, &total_dur_in_microseconds, 1, MPI_UNSIGNED_LONG,
+				  MPI_SUM, MPI_COMM_WORLD);
 
-	printf("rank: %d, dur_in_microseconds: %ld, total_dur_in_microsecond: %ld\n",
-		   mpi_rank, dur_in_microseconds, total_dur_in_microseconds);
+	fmt::print("rank: {}, dur_in_microseconds: {}, total_dur_in_microsecond: {}\n",
+			   mpi_rank, dur_in_microseconds, total_dur_in_microseconds);
 
-	uint32_t total_success = 0;
+	unsigned int total_success = 0;
 	MPI_Allreduce(&n_success, &total_success, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 #else
-	uint64_t total_dur_in_microseconds = node_dur.count();
-	uint32_t total_success = n_success;
+	unsigned long total_dur_in_microseconds = node_dur.count();
+	unsigned int total_success = n_success;
 #endif
 
 	if(mpi_rank == 0)
 	{
-		char filename[255];
-		sprintf(filename, "out_L%d_%06d.json", L, int(p * 100000 + 0.5));
+		std::string filename
+			= fmt::format("out_L{:d}_P{:0{}d}.json", L, p_format(p), p_precision + 1);
 		std::ofstream out_data(filename);
 		nlohmann::json out_j;
 		out_j["L"] = L;
