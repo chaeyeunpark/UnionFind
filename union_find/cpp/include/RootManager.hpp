@@ -49,8 +49,7 @@ public:
 
 		operator int() const
 		{
-			if(!mgr_.is_root(root_))
-				return 0;
+			if(!mgr_.is_root(root_)) return 0;
 			const auto it = mgr_.size_.find(root_);
 			return it->second;
 		}
@@ -91,8 +90,7 @@ public:
 
 	inline int size(Vertex root) const
 	{
-		if(!is_root(root))
-			return 0;
+		if(!is_root(root)) return 0;
 		const auto it = size_.find(root);
 		return it->second;
 	}
@@ -100,8 +98,7 @@ public:
 	inline int parity(Vertex root) const
 	{
 		auto it = parity_.find(root);
-		if(it == parity_.end())
-			return 0;
+		if(it == parity_.end()) return 0;
 		return it->second;
 	}
 
@@ -119,10 +116,7 @@ public:
 
 		const auto new_parity = parity(root1) + parity(root2);
 
-		if((new_parity % 2) == 1)
-		{
-			odd_roots_.emplace(root1);
-		}
+		if((new_parity % 2) == 1) { odd_roots_.emplace(root1); }
 		else
 		{
 			odd_roots_.erase(root1);

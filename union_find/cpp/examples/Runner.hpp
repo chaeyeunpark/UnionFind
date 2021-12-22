@@ -14,14 +14,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
-#include <Eigen/Dense>
+#pragma once
 
-#include "error_utils.hpp"
-#include "utility.hpp"
+#ifdef USE_MPI
+#pragma message("Build with MPI")
+#include <mpi.h>
+#endif
 
-void layer_syndrome_diff(const int L, std::vector<int>& syndromes)
+#include <span>
+
+class Runner
 {
-	Eigen::Map<Eigen::ArrayXXi> syndromes_map(syndromes.data(), L * L, L);
-	for(int h = L - 1; h >= 1; --h) { syndromes_map.col(h) -= syndromes_map.col(h - 1); }
-	syndromes_map = syndromes_map.unaryExpr([](int x) { return (x + 2) % 2; });
-}
+public:
+	void parse_args(std::span<char*> args) { }
+};

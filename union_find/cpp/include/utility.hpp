@@ -53,47 +53,6 @@ struct Edge
 
 void to_json(nlohmann::json& j, const Edge& e);
 void from_json(const nlohmann::json& j, Edge& e);
-
-inline bool is_horizontal(int L, Edge e)
-{
-	return ((e.v - e.u) == 1) || ((e.v - e.u) == (L - 1));
-}
-inline bool is_vertical(int L, Edge e)
-{
-	return !is_horizontal(L, e);
-}
-
-inline int lower(int L, Edge e) // works only when vertical
-{
-	if((e.v - e.u) == L)
-		return e.u;
-	else
-		return e.v;
-}
-
-inline int upper(int L, Edge e)
-{
-	if((e.v - e.u) == L)
-		return e.v;
-	else
-		return e.u;
-}
-
-inline int left(int L, Edge e) // works only when horizontal
-{
-	if((e.v - e.u) == 1)
-		return e.u;
-	else
-		return e.v;
-}
-inline int right(int L, Edge e) // works only when horizontal
-{
-	if((e.v - e.u) == 1)
-		return e.v;
-	else
-		return e.u;
-}
-
 std::ostream& operator<<(std::ostream&, const UnionFindCPP::Edge& e);
 } // namespace UnionFindCPP
 

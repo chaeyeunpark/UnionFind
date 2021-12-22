@@ -16,7 +16,7 @@
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "Decoder.hpp"
-#include "LatticFromParity.hpp"
+#include "LatticeFromParity.hpp"
 
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"

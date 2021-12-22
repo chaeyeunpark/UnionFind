@@ -1,3 +1,19 @@
+// Copyright (C) 2021 UnionFind++ authors
+//
+// This file is part of UnionFind++.
+//
+// UnionFind++ is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// UnionFind++ is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #include "LatticeFromParity.hpp"
 
 #include <random>
@@ -24,7 +40,8 @@ using UnionFindCPP::LatticeFromParity;
  *
  * which means that $P_0 = X_0 X_3 X_4 X_{12}, \cdots$.
  */
-auto toric_x_stabilizers_qubits_old(const int Lx, const int Ly, int vertex) -> std::set<int>
+auto toric_x_stabilizers_qubits_old(const int Lx, const int Ly, int vertex)
+	-> std::set<int>
 {
 	int row = vertex / Lx;
 	int col = vertex % Lx;

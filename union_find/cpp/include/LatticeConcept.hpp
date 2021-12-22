@@ -41,6 +41,9 @@ template<typename T>
 concept vertex_connections_result
 	= std::convertible_to<T, std::vector<int>> || detail::std_array<T>;
 
+/**
+ * @brief Define LatticeConcept that custom Lattice classes should follow.
+ * */
 template<typename T>
 concept LatticeConcept = requires(const T lattice, int vertex, Edge e)
 {
@@ -60,4 +63,4 @@ concept LatticeConcept = requires(const T lattice, int vertex, Edge e)
 		lattice.edge_idx(e)
 		} -> std::convertible_to<int>;
 };
-}
+} // namespace UnionFindCPP

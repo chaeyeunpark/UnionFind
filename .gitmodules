@@ -4,3 +4,6 @@
 [submodule "robin-map"]
 	path = union_find/cpp/externals/robin-map
 	url = https://github.com/Tessil/robin-map.git
+[submodule "union_find/cpp/externals/fmt"]
+	path = union_find/cpp/examples/fmt
+	url = https://github.com/fmtlib/fmt.git

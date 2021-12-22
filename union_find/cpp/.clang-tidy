@@ -1,6 +1,6 @@
 ---
-Checks:          '*,-fuchsia-default-arguments-calls,-fuchsia-trailing-return,-fuchsia-overloaded-operator'
-WarningsAsErrors: '*'
+Checks:          '*,-fuchsia-default-arguments-calls,-fuchsia-trailing-return,-fuchsia-overloaded-operator,-google-runtime-references,-google-runtime-int'
+WarningsAsErrors: '*,-clang-diagnostic-#pragma-messages'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     none

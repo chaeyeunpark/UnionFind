@@ -84,14 +84,13 @@ private:
 
 public:
 	/**
-	 * @breif construct a Lattice class from a given parity matrix (CSR format)
+	 * @brief construct a Lattice class from a given parity matrix (CSR format)
 	 *
 	 * @param num_parities total number of parities. Same as the number of rows of the
 	 * matrix.
 	 * @param num_qubits total number of qubits. Same as the number of columns of the
 	 * matrix
 	 * @param nnz total number of non-zero values
-	 * @param data pointer for the matrix
 	 * @param col_indices indices[idx] indicate the column index of the element data[idx]
 	 * @param indptr indptr[row+1]-indptr[row] indicate the number of elements in the row
 	 */

@@ -62,17 +62,11 @@ private:
 		connection_counts_ = std::vector<Vertex>(lattice_.num_vertices(), 0);
 		support_ = std::vector<int>(lattice_.num_edges(), 0);
 		mgr_.initialize_roots(roots);
-		for(auto root : roots)
-		{
-			border_vertices_[root].emplace(root);
-		}
+		for(auto root : roots) { border_vertices_[root].emplace(root); }
 
 		root_of_vertex_.resize(lattice_.num_vertices());
 
-		for(int u = 0; u < lattice_.num_vertices(); ++u)
-		{
-			root_of_vertex_[u] = u;
-		}
+		for(int u = 0; u < lattice_.num_vertices(); ++u) { root_of_vertex_[u] = u; }
 	}
 
 	void grow(Vertex root)
@@ -84,8 +78,7 @@ private:
 				auto edge = Edge(border_vertex, v);
 
 				int& elt = support_[lattice_.edge_idx(edge)];
-				if(elt == 2)
-					continue;
+				if(elt == 2) continue;
 				if(++elt == 2)
 				{
 					connection_counts_[edge.u]++;
@@ -99,13 +92,11 @@ private:
 	Vertex find_root(Vertex vertex)
 	{
 		Vertex tmp = root_of_vertex_[vertex];
-		if(tmp == vertex)
-			return vertex;
+		if(tmp == vertex) return vertex;
 
 		std::vector<Vertex> path;
 		Vertex root;
-		do
-		{
+		do {
 			root = tmp;
 			path.emplace_back(root);
 			tmp = root_of_vertex_[root];
@@ -113,10 +104,7 @@ private:
 
 		// now root == (tmp = root_of_vertex_[root])
 
-		for(const auto v : path)
-		{
-			root_of_vertex_[v] = root;
-		}
+		for(const auto v : path) { root_of_vertex_[v] = root; }
 		return root;
 	}
 
@@ -152,8 +140,7 @@ private:
 			peeling_edges_.push_back(fuse_edge);
 
 			// let the size of the cluster of root1 be larger than that of root2
-			if(mgr_.size(root1) < mgr_.size(root2))
-				std::swap(root1, root2);
+			if(mgr_.size(root1) < mgr_.size(root2)) std::swap(root1, root2);
 
 			root_of_vertex_[root2] = root1;
 
@@ -224,20 +211,14 @@ public:
 		std::vector<Vertex> syndrome_vertices;
 		for(int n = 0; n < syndromes.size(); ++n)
 		{
-			if((syndromes[n] % 2) != 0)
-			{
-				syndrome_vertices.emplace_back(n);
-			}
+			if((syndromes[n] % 2) != 0) { syndrome_vertices.emplace_back(n); }
 		}
 
 		init_cluster(syndrome_vertices);
 
 		while(!mgr_.isempty_odd_root())
 		{
-			for(auto root : mgr_.odd_roots())
-			{
-				grow(root);
-			}
+			for(auto root : mgr_.odd_roots()) { grow(root); }
 			fusion();
 		}
 

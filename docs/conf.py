@@ -12,7 +12,30 @@
 #
 import os
 import sys
+from pathlib import Path
+import subprocess
+import json
 
+def obtain_cpp_files():
+    currdir = Path(__file__).resolve().parent # PROJECT_SOURCE_DIR/docs
+    project_source_dir = currdir.parent;
+    script_path = project_source_dir.joinpath('union_find/cpp/build_utils/cpp_files.py')
+
+    if not script_path.exists():
+        print('The project directory structure is corrupted.')
+        sys.exit(1)
+
+    p = subprocess.Popen([script_path], shell=True, stdin=None,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+    out, _ = p.communicate()
+    parsed = json.loads(out)
+
+    file_list = []
+    for item in parsed:
+        file_list.append('../' + str(Path(item['name']).relative_to(project_source_dir)))
+    return file_list
+
+CPP_FILES = obtain_cpp_files()
 sys.path.insert(0, os.path.abspath('_ext'))
 
 
@@ -29,7 +52,37 @@ author = 'Chae-Yeun Park'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'breathe',
+    'exhale'
 ]
+
+# Setup the breathe extension
+breathe_projects = {
+    "UnionFindPy": "./_doxygen/xml"
+}
+breathe_default_project = "UnionFindPy"
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./api",
+    "rootFileName":          "library_root.rst",
+    "doxygenStripFromPath":  "..",
+    # Heavily encouraged optional argument (see docs)
+    "rootFileTitle":         "Library API",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    # "treeViewIsBootstrap": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin":    "INPUT = " + ' '.join(CPP_FILES)
+}
+
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

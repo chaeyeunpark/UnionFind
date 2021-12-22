@@ -5,12 +5,21 @@ import sys
 import os
 
 FILE_EXTENSIONS = ['.hpp', '.cpp']
-SOURCE_DIRS = ['binding', 'examples', 'include', 'src', 'tests']
+SOURCE_DIRS = ['binding',  'include', 'src']
 EXCLUDE_DIRS = []
-#EXCLUDE_DIRS = ['union_find/cpp/externals', 'union_find/cpp/build']
 PROJECT_SOURCE_DIR = Path(__file__).parent.parent.resolve()
 
 if __name__ == '__main__':
+    include_examples = False
+    include_tests = False
+
+    for arg in sys.argv[1:]:
+        if arg == '--include-examples':
+            SOURCE_DIRS += ['examples']
+        if arg == '--include-tests':
+            SOURCE_DIRS += ['tests']
+
+
     file_list = []
     for source_dir in SOURCE_DIRS:
         source_dir_full = PROJECT_SOURCE_DIR.joinpath(source_dir)
