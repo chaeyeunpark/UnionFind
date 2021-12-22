@@ -1,39 +1,38 @@
 // Copyright (C) 2021 UnionFind++ authors
 //
 // This file is part of UnionFind++.
-// 
+//
 // UnionFind++ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // UnionFind++ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
-#include "utility.hpp"
-#include "RootManager.hpp"
 #include "LatticeConcept.hpp"
+#include "RootManager.hpp"
+#include "utility.hpp"
 
-#include <tsl/robin_set.h>
 #include <tsl/robin_map.h>
+#include <tsl/robin_set.h>
 
-#include <cstdint>
-#include <vector>
+#include <algorithm>
 #include <array>
-#include <set>
+#include <cstdint>
 #include <map>
 #include <queue>
-#include <algorithm>
+#include <set>
+#include <vector>
 
 namespace UnionFindCPP
 {
-template<LatticeConcept Lattice>
-class Decoder
+template<LatticeConcept Lattice> class Decoder
 {
 public:
 	using Vertex = int;
@@ -53,18 +52,17 @@ private:
 
 	RootManager mgr_;
 	/* key: root, value: borders */
-	tsl::robin_map<Vertex, tsl::robin_set<Vertex>> border_vertices_; 
+	tsl::robin_map<Vertex, tsl::robin_set<Vertex>> border_vertices_;
 
 	/* Data for peeling */
 	std::deque<Edge> peeling_edges_;
-
 
 	void init_cluster(const std::vector<int>& roots)
 	{
 		connection_counts_ = std::vector<Vertex>(lattice_.num_vertices(), 0);
 		support_ = std::vector<int>(lattice_.num_edges(), 0);
 		mgr_.initialize_roots(roots);
-		for(auto root: roots)
+		for(auto root : roots)
 		{
 			border_vertices_[root].emplace(root);
 		}
@@ -79,9 +77,9 @@ private:
 
 	void grow(Vertex root)
 	{
-		for(auto border_vertex: border_vertices_[root])
+		for(auto border_vertex : border_vertices_[root])
 		{
-			for(auto v: lattice_.vertex_connections(border_vertex))
+			for(auto v : lattice_.vertex_connections(border_vertex))
 			{
 				auto edge = Edge(border_vertex, v);
 
@@ -90,8 +88,8 @@ private:
 					continue;
 				if(++elt == 2)
 				{
-					connection_counts_[edge.u] ++;
-					connection_counts_[edge.v] ++;
+					connection_counts_[edge.u]++;
+					connection_counts_[edge.v]++;
 					fuse_list_.emplace_back(edge);
 				}
 			}
@@ -111,11 +109,11 @@ private:
 			root = tmp;
 			path.emplace_back(root);
 			tmp = root_of_vertex_[root];
-		}while(tmp != root);
-		
+		} while(tmp != root);
+
 		// now root == (tmp = root_of_vertex_[root])
 
-		for(const auto v: path)
+		for(const auto v : path)
 		{
 			root_of_vertex_[v] = root;
 		}
@@ -124,10 +122,10 @@ private:
 
 	void merge_boundary(Vertex root1, Vertex root2)
 	{
-		border_vertices_[root1].insert(
-			border_vertices_[root2].cbegin(), border_vertices_[root2].cend());
-		
-		for(auto vertex: border_vertices_[root2])
+		border_vertices_[root1].insert(border_vertices_[root2].cbegin(),
+									   border_vertices_[root2].cend());
+
+		for(auto vertex : border_vertices_[root2])
 		{
 			if(connection_counts_[vertex] == lattice_.vertex_connection_count(vertex))
 			{
@@ -148,11 +146,10 @@ private:
 
 			if(root1 == root2)
 			{
-				continue; //do nothing
+				continue; // do nothing
 			}
-			
-			peeling_edges_.push_back(fuse_edge);
 
+			peeling_edges_.push_back(fuse_edge);
 
 			// let the size of the cluster of root1 be larger than that of root2
 			if(mgr_.size(root1) < mgr_.size(root2))
@@ -170,7 +167,6 @@ private:
 				mgr_.merge(root1, root2);
 				merge_boundary(root1, root2);
 			}
-
 		}
 	}
 
@@ -179,7 +175,7 @@ private:
 		std::vector<Edge> corrections;
 		tsl::robin_map<Vertex, int> vertex_count;
 
-		for(Edge edge: peeling_edges_)
+		for(Edge edge : peeling_edges_)
 		{
 			++vertex_count[edge.u];
 			++vertex_count[edge.v];
@@ -213,19 +209,14 @@ private:
 			{
 				corrections.emplace_back(leaf_edge);
 				--syndromes[u];
-				syndromes[v] = 1-syndromes[v];
+				syndromes[v] = 1 - syndromes[v];
 			}
 		}
 		return corrections;
 	}
 
-
 public:
-	template<typename ...Args>
-	Decoder(Args&&... args)
-		: lattice_{args...}
-	{
-	}
+	template<typename... Args> Decoder(Args&&... args) : lattice_{args...} { }
 
 	std::vector<Edge> decode(std::vector<int>& syndromes)
 	{
@@ -233,7 +224,7 @@ public:
 		std::vector<Vertex> syndrome_vertices;
 		for(int n = 0; n < syndromes.size(); ++n)
 		{
-			if ((syndromes[n] % 2) != 0)
+			if((syndromes[n] % 2) != 0)
 			{
 				syndrome_vertices.emplace_back(n);
 			}
@@ -243,7 +234,7 @@ public:
 
 		while(!mgr_.isempty_odd_root())
 		{
-			for(auto root: mgr_.odd_roots())
+			for(auto root : mgr_.odd_roots())
 			{
 				grow(root);
 			}
@@ -253,20 +244,11 @@ public:
 		return peeling(syndromes);
 	}
 
-	inline int num_vertices() const
-	{
-		return lattice_.num_vertices();
-	}
+	inline int num_vertices() const { return lattice_.num_vertices(); }
 
-	inline int num_edges() const
-	{
-		return lattice_.num_edges();
-	}
+	inline int num_edges() const { return lattice_.num_edges(); }
 
-	inline int edge_idx(const Edge& edge) const
-	{
-		return lattice_.edge_idx(edge);
-	}
+	inline int edge_idx(const Edge& edge) const { return lattice_.edge_idx(edge); }
 
 	void clear()
 	{
@@ -274,8 +256,7 @@ public:
 
 		mgr_.clear();
 
-		tsl::robin_map<Vertex, tsl::robin_set<Vertex> >().swap(
-				border_vertices_);
+		tsl::robin_map<Vertex, tsl::robin_set<Vertex>>().swap(border_vertices_);
 
 		std::deque<Edge>().swap(peeling_edges_);
 	}

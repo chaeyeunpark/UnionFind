@@ -88,7 +88,7 @@ requirements = [
 ]
 
 info = {
-    "name": "UnionFindCPP",
+    "name": "UnionFindPy",
     "version": version,
     "maintainer": "Chae-Yeun Park",
     "maintainer_email": "chae.yeun.park@gmail.com",
