@@ -109,11 +109,6 @@ public:
 	// size of the cluster of root1 is larger than that of root2
 	void merge(Vertex root1, Vertex root2)
 	{
-
-#ifdef DEBUG
-		// fprintf(stderr, "merging root %d to %d\n", root2, root1);
-#endif
-
 		const auto new_parity = parity(root1) + parity(root2);
 
 		if((new_parity % 2) == 1) { odd_roots_.emplace(root1); }

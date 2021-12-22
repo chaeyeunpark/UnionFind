@@ -25,7 +25,7 @@ def obtain_cpp_files():
         print('The project directory structure is corrupted.')
         sys.exit(1)
 
-    p = subprocess.Popen([script_path], shell=True, stdin=None,
+    p = subprocess.Popen([script_path], shell=False, stdin=None,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
     out, _ = p.communicate()
     parsed = json.loads(out)
