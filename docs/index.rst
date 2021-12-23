@@ -13,6 +13,7 @@ Main page
    install
    usage
    custom_lattice
+   python_api
    api/library_root
 
 Indices and tables

@@ -7,7 +7,7 @@ help:
 	@echo "  doc"
 
 clean:
-	rm -rf ./build/* ./UnionFindPy.egg-info 
+	rm -rf ./build/* ./UnionFindPy.egg-info union_find/_union_find_py.cpython-*
 	$(MAKE) -C ./docs clean
 	$(MAKE) -C ./union_find/cpp clean
 
