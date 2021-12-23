@@ -1,12 +1,12 @@
 Implementing Custom Lattice
 ============================
 
-.. highlight:: c++
+Even though one can use our python binding for any possible lattices, implementing a lattice directly in C++ can boost decoding speeds.
 
 As our ``UnionFind`` is a template class, you can add your own custom lattice without much difficulty. 
-A custom lattice class should implement 5 methods.
+A custom lattice class should implement 5 methods (implementing ``LatticeConcept``).
 
-::
+.. code-block:: c++
 
     class CustomLattice
     {
@@ -24,7 +24,7 @@ A custom lattice class should implement 5 methods.
 
 Then you can use our ``UnionFind`` template class in your C++ code as
 
-::
+.. code-block:: c++
 
 	#include <UnionFind.hpp>
 	auto decoder = UnionFind<CustomLattice>(args...);
