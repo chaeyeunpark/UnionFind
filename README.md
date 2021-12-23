@@ -29,37 +29,23 @@ cd UnionFind
 git submodule update --init --recursive
 ```
 
-and compile the code.
+and install the package.
 ```bash
-mkdir build && cd build
-cmake ..
-make union_find
+pip install -r requirements.txt
+python3 setup.py install
 ```
 
 After that, you can see `union_find.cpython-[some extra string].so` file in your `build` directory. Copy this file into your python code directory. Then you can use it.
 ```python
-from union_find import UnionFindDecoder
-decoder = UnionFindDecoder(lattice_size) # L = lattice_size
-decoder.decode(syndromes) # syndromes is a list of size L^2
-decoder.clear() # should be called for reuse
+from union_find import Decoder
+decoder = Decoder(parity_matrix)
+decoder.decode(syndromes) # syndromes is a list of measurment outcomes of each parity operator
 ```
 
-You can also compile binary executables:
-```bash
-cmake -DBUILD_EXECUTABLES=ON ..
-make all
-```
-
-This builds the toric code examples with and without syndrome measurement errors for the bit-flip and depolarizing noise models. If MPI is found, the MPI version of code is also compiled.
-
+For details, check the [document](https://unionfind.readthedocs.io/en/latest/?badge=latest).
 
 ## Notes
 This repository does not contain an implementation of weighted Union-Find decoder. 
-
-## Changes from v0.1
-* Qubit ordering and interfaces have been changed. Now it is compatible with [PyMatching](https://github.com/oscarhiggott/PyMatching).
-* 3D version is added to address noisy syndrome measurements.
-
 
 ## Reference
 When you cite this repository, please use the following:
@@ -72,4 +58,3 @@ When you cite this repository, please use the following:
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/chaeyeunpark/UnionFind}}
 }
-
