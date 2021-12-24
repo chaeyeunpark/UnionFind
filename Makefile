@@ -8,6 +8,7 @@ help:
 
 clean:
 	rm -rf ./build/* ./UnionFindPy.egg-info UnionFindPy/_union_find_py.cpython-*
+	find . -type d -name __pycache__ -exec rm -r {} \+
 	$(MAKE) -C ./docs clean
 	$(MAKE) -C ./UnionFindPy/cpp clean
 
