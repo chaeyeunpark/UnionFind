@@ -91,8 +91,8 @@ public:
 			return to_edge_idx(L, Edge{edge.u % (L * L), edge.v % (L * L)})
 				   + 3 * L * L * uh;
 		}
-		else
-		{ // NOLINT(llvm-else-after-return,readability-else-after-return)
+		else // NOLINT(llvm-else-after-return,readability-else-after-return)
+		{
 			uint32_t row = (edge.u / L) % L;
 			uint32_t col = edge.u % L;
 			return 3 * L * L * uh + 2 * L * L + L * row + col;
@@ -109,8 +109,8 @@ public:
 			auto [row, col] = UnionFindCPP::vertex_to_coord(L, layer_idx - 2 * L * L);
 			return Edge{to_vertex_index(row, col, h), to_vertex_index(row, col, h + 1)};
 		}
-		else
-		{ // NOLINT(llvm-else-after-return,readability-else-after-return)
+		else // NOLINT(llvm-else-after-return,readability-else-after-return)
+		{
 			Edge e_2d = UnionFindCPP::to_edge(L, layer_idx);
 			return Edge{e_2d.u + h * L * L, e_2d.v + h * L * L};
 		}

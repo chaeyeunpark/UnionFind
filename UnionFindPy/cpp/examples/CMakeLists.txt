@@ -11,7 +11,7 @@ endif()
 
 add_library(example_utils STATIC "error_utils.cpp" "toric_utils.cpp" "runner_utils.cpp")
 target_link_libraries(example_utils PRIVATE union_find_cpp_dependency Eigen3::Eigen)
-target_link_libraries(example_utils PRIVATE fmt::fmt-header-only)
+target_link_libraries(example_utils PUBLIC fmt::fmt-header-only)
 
 # 2D Bitflip noise
 add_executable(run_uf_2d_bitflip "run_uf_2d_bitflip.cpp")

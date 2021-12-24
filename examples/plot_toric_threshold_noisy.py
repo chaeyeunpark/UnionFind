@@ -23,7 +23,7 @@ def num_decoding_failures_noisy_syndromes(H, logicals, p, q, num_trials, repetit
         noisy_syndrome = (syndrome + syndrome_error) % 2
         # Convert to difference syndrome
         noisy_syndrome[1:,:] = (noisy_syndrome[1:, :] - noisy_syndrome[0:-1, :]) % 2
-        correction = decoder.decode(noisy_syndrome.flatten())
+        correction = decoder.decode(noisy_syndrome)
 
         error = (noise_total + correction) % 2
         assert not np.any(H @ error % 2)

@@ -25,6 +25,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# TODO: export target UnionFindCPP::header-only when imported from another
 
 # include UnionFindCPP
 set(BUILD_UNION_FIND_PY ON)

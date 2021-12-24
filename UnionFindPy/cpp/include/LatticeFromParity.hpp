@@ -49,7 +49,7 @@ private:
 		-> std::vector<std::vector<uint32_t>>
 	{
 		/**
-		 * key: qubit_idx, value: vector of all connected verticies (parities). Length
+		 * key: qubit_idx, value: vector of all connected vertices (parities). Length
 		 * num_qubits
 		 */
 		std::vector<std::vector<uint32_t>> qubit_associated_parities(num_qubits);

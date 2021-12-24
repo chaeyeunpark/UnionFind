@@ -39,11 +39,16 @@ class Decoder:
 
         :param syndrome_arr: for a given parity index `i`, syndrome_arr[i] must be 0 or 1. 
         """
-        corrections = self._decoder.decode(syndrome_arr)
-        self._decoder.clear()
+        if syndrome_arr.size != self._decoder.num_vertices:
+            raise ValueError("The size of syndrome_arr mismatches the size of all stabilizers")
+
         if self._repetitions is None:
+            corrections = self._decoder.decode(syndrome_arr)
+            self._decoder.clear()
             return corrections
         else:
+            corrections = self._decoder.decode(syndrome_arr.flatten())
+            self._decoder.clear()
             res = np.zeros((self._layer_num_qubits,), dtype=int)
             for depth in range(self._repetitions):
                 res += corrections[depth*(self._layer_num_qubits + self._layer_vertex_size):depth*(self._layer_num_qubits + self._layer_vertex_size)+self._layer_num_qubits]
