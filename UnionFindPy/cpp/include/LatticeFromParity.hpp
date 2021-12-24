@@ -41,7 +41,6 @@ private:
 
 	/* connectivity of vertices (parities). Length num_parities */
 	std::vector<std::vector<uint32_t>> vertex_connections_;
-
 	tsl::robin_map<Edge, uint32_t> edge_idx_;
 
 	static auto construct_qubit_associated_parities(uint32_t num_parities,
@@ -53,8 +52,7 @@ private:
 		 * key: qubit_idx, value: vector of all connected verticies (parities). Length
 		 * num_qubits
 		 */
-		std::vector<std::vector<uint32_t>> qubit_associated_parities;
-		qubit_associated_parities.resize(num_qubits);
+		std::vector<std::vector<uint32_t>> qubit_associated_parities(num_qubits);
 		for(uint32_t p_idx = 0; p_idx < num_parities; ++p_idx)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -154,16 +152,17 @@ public:
 			}
 		}
 
+		// Add timelike edges
 		for(uint32_t depth = 0; depth < repetitions - 1; ++depth)
 		{
-			// Add timelike edges
 			for(int layer_vertex_idx = 0; layer_vertex_idx < layer_vertex_size;
 				++layer_vertex_idx)
 			{
 				auto edge = Edge{depth * layer_vertex_size + layer_vertex_idx,
 								 (depth + 1) * layer_vertex_size + layer_vertex_idx};
 				edge_idx_.emplace(edge,
-								  layer_vertex_idx + layer_num_qubits * (depth + 1));
+								  layer_vertex_idx + layer_num_qubits +
+								  (layer_num_qubits + layer_vertex_size) * depth);
 			}
 		}
 
@@ -187,9 +186,9 @@ public:
 		return edge_idx_.at(edge);
 	}
 
-	[[nodiscard]] auto num_edges() const -> uint32_t { return num_edges_; }
+	[[nodiscard]] inline auto num_edges() const -> uint32_t { return num_edges_; }
 
-	[[nodiscard]] auto num_vertices() const -> uint32_t { return num_vertices_; }
+	[[nodiscard]] inline auto num_vertices() const -> uint32_t { return num_vertices_; }
 
 	[[nodiscard]] inline auto
 	edge_idx_all() const& -> const tsl::robin_map<Edge, uint32_t>&

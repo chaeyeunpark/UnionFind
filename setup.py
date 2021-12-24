@@ -80,7 +80,7 @@ class CMakeBuild(build_ext):
         )
 
 
-with open("union_find/_version.py") as f:
+with open("UnionFindPy/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 requirements = [
@@ -95,17 +95,16 @@ info = {
     "url": "https://github.com/chaeyeunpark/UnionFind",
     "license": "GNU Lesser General Public License v2.1",
     "packages": find_packages(where="."),
-    "package_data": {"union_find": ["cpp/*"]},
+    "package_data": {"UnionFindPy": ["cpp/*"]},
     "entry_points": {
     },
     "description": "C++ implemenation of UnionFind with a python binding",
     "long_description": open("README.md").read(),
     "long_description_content_type": "text/markdown",
-    "provides": ["union_find"],
+    "provides": ["UnionFindPy"],
     "install_requires": requirements,
     "ext_modules": [CMakeExtension("_union_find_py")],
-    "cmdclass": {"build_ext": CMakeBuild},
-    "ext_package": "union_find",
+    "cmdclass": {"build_ext": CMakeBuild}
 }
 
 classifiers = [

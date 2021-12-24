@@ -12,7 +12,7 @@ clean:
 	$(MAKE) -C ./union_find/cpp clean
 
 format-cpp:
-	$(MAKE) -C ./union_find/cpp format
+	$(MAKE) -C ./UnionFindPy/cpp format
 
 doc:
 	$(MAKE) -C ./docs html

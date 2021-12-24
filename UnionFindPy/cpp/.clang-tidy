@@ -1,6 +1,6 @@
 ---
 Checks:          '*,-fuchsia-default-arguments-calls,-fuchsia-trailing-return,-fuchsia-overloaded-operator,-google-runtime-references,-llvmlibc-*,-readability-function-cognitive-complexity,-llvm-header-guard'
-WarningsAsErrors: '*,-clang-diagnostic-#pragma-messages,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions,-altera-struct-pack-align,-google-runtime-int,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay'
+WarningsAsErrors: '*,-clang-diagnostic-#pragma-messages,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions,-altera-struct-pack-align,-google-runtime-int,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay,-clang-analyzer-optin.portability.UnixAPI'
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
 HeaderFilterRegex: '.*\.hpp'

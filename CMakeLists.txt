@@ -15,7 +15,7 @@ function(set_union_find_version VERSION_FILE_PATH)
     set(VERSION_STRING ${VERSION_STRING} parent_scope)
 endfunction()
 
-set_union_find_version(${PROJECT_SOURCE_DIR}/union_find/_version.py)
+set_union_find_version(${PROJECT_SOURCE_DIR}/UnionFindPy/_version.py)
 
 message(STATUS "union_find version ${VERSION_STRING}")
 set(PROJECT_VERSION ${VERSION_STRING})
@@ -28,4 +28,4 @@ endif()
 
 # include UnionFindCPP
 set(BUILD_UNION_FIND_PY ON)
-add_subdirectory(union_find/cpp)
+add_subdirectory(UnionFindPy/cpp)
