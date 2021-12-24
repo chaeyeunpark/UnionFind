@@ -1,5 +1,5 @@
 Python API
 ========================
 
-.. automodule:: union_find.decoder
+.. automodule:: UnionFindPy.decoder
    :members:

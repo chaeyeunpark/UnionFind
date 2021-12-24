@@ -20,7 +20,7 @@ currdir = Path(__file__).resolve().parent # PROJECT_SOURCE_DIR/docs
 PROJECT_SOURCE_DIR = currdir.parent
 
 def obtain_cpp_files():
-    script_path = PROJECT_SOURCE_DIR.joinpath('union_find/cpp/build_utils/cpp_files.py')
+    script_path = PROJECT_SOURCE_DIR.joinpath('UnionFindPy/cpp/build_utils/cpp_files.py')
 
     if not script_path.exists():
         print('The project directory structure is corrupted.')
@@ -94,7 +94,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'union_find/cpp']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'UnionFindPy/cpp']
 
 
 # -- Options for HTML output -------------------------------------------------

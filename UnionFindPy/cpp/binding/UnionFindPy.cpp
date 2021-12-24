@@ -25,9 +25,9 @@
 #include <stdexcept>
 
 // NOLINTBEGIN(cppcoreguidelines-*)
-void free_int_arr(void* p)
+void free_arr_uint32(void* p)
 {
-	int* p_int = reinterpret_cast<int*>(p);
+	uint32_t* p_int = reinterpret_cast<uint32_t*>(p);
 	delete[] p_int;
 }
 // NOLINTEND(cppcoreguidelines-*)
@@ -44,10 +44,44 @@ PYBIND11_MODULE(_union_find_py, m)
 			   py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
 			   py::array_t<int, py::array::c_style | py::array::forcecast> indptr)
 			{
+				if (num_parities <= 0)
+				{
+					throw std::invalid_argument("Number of partiy operators must be larger than 0");
+				}
+				if (num_qubits <= 0)
+				{
+					throw std::invalid_argument("Number of qubits must be larger than 0");
+				}
 				// check the given dimension is correct
-				return UnionFindFromParity(num_parities, num_qubits,
+				return UnionFindFromParity(static_cast<uint32_t>(num_parities),
+										   static_cast<uint32_t>(num_qubits),
 										   static_cast<int*>(col_indices.request().ptr),
 										   static_cast<int*>(indptr.request().ptr));
+			}))
+		.def(py::init(
+			[](int num_parities, int num_qubits,
+			   py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
+			   py::array_t<int, py::array::c_style | py::array::forcecast> indptr,
+			   int repetitions)
+			{
+				if (num_parities <= 0)
+				{
+					throw std::invalid_argument("Number of partiy operators must be larger than 0");
+				}
+				if (num_qubits <= 0)
+				{
+					throw std::invalid_argument("Number of qubits must be larger than 0");
+				}
+				if (repetitions <= 1)
+				{
+					throw std::invalid_argument("Repetitions must be larger than 1");
+				}
+				// check the given dimension is correct
+				return UnionFindFromParity(static_cast<uint32_t>(num_parities),
+										   static_cast<uint32_t>(num_qubits),
+										   static_cast<int*>(col_indices.request().ptr),
+										   static_cast<int*>(indptr.request().ptr),
+										   static_cast<uint32_t>(repetitions));
 			}))
 		.def("clear", &UnionFindFromParity::clear, "Clear decoder's internal data")
 		.def_property_readonly("num_edges", &UnionFindFromParity::num_edges,
@@ -58,7 +92,7 @@ PYBIND11_MODULE(_union_find_py, m)
 		.def(
 			"decode",
 			[](UnionFindFromParity& decoder,
-			   std::vector<int>& syndromes) -> py::array_t<int>
+			   std::vector<uint32_t> syndromes) -> py::array_t<uint32_t>
 			{
 				if(decoder.num_vertices() != syndromes.size())
 				{
@@ -67,15 +101,15 @@ PYBIND11_MODULE(_union_find_py, m)
 				}
 				auto res = decoder.decode(syndromes);
 
-				int* corrections = new int[decoder.num_edges()];
-				memset(corrections, 0, sizeof(int) * decoder.num_edges());
+				uint32_t* corrections = new uint32_t[decoder.num_edges()];
+				memset(corrections, 0, sizeof(uint32_t) * decoder.num_edges());
 				for(size_t i = 0; i < res.size(); ++i)
 				{
 					corrections[decoder.edge_idx(res[i])] = 1;
 				}
-				py::capsule free_when_done(corrections, free_int_arr);
+				py::capsule free_when_done(corrections, free_arr_uint32);
 
-				return py::array_t<int>({(int64_t)decoder.num_edges()}, corrections,
+				return py::array_t<uint32_t>({(int64_t)decoder.num_edges()}, corrections,
 										free_when_done);
 			},
 			"Decode the given syndroms");
