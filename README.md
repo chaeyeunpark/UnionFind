@@ -1,4 +1,3 @@
-
 [![Documentation Status](https://readthedocs.org/projects/unionfind/badge/?version=latest)](https://unionfind.readthedocs.io/en/latest/?badge=latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/chaeyeunpark/unionfind/badge)](https://www.codefactor.io/repository/github/chaeyeunpark/unionfind)
 

@@ -8,6 +8,8 @@ class Decoder:
 
     :param parity_matrix (scipy.sparse.csr_matrix): a parity matrix in CSR format
     """
+    
+    _repetitions = None
 
     def __init__(self, parity_matrix, repetitions = None):
         """Create a decoder from a parity matrix"""
@@ -25,6 +27,9 @@ class Decoder:
             self._decoder = DecoderFromParity(parity_matrix.shape[0], 
                     parity_matrix.shape[1], parity_matrix.indices, parity_matrix.indptr)
         else:
+            self._repetitions = repetitions
+            self._layer_vertex_size = parity_matrix.shape[0]
+            self._layer_num_qubits = parity_matrix.shape[1]
             self._decoder = DecoderFromParity(parity_matrix.shape[0], 
                     parity_matrix.shape[1], parity_matrix.indices, parity_matrix.indptr,
                     repetitions)
@@ -34,7 +39,13 @@ class Decoder:
 
         :param syndrome_arr: for a given parity index `i`, syndrome_arr[i] must be 0 or 1. 
         """
-        res = self._decoder.decode(syndrome_arr)
+        corrections = self._decoder.decode(syndrome_arr)
         self._decoder.clear()
-        return res
-
+        if self._repetitions is None:
+            return corrections
+        else:
+            res = np.zeros((self._layer_num_qubits,), dtype=int)
+            for depth in range(self._repetitions):
+                res += corrections[depth*(self._layer_num_qubits + self._layer_vertex_size):depth*(self._layer_num_qubits + self._layer_vertex_size)+self._layer_num_qubits]
+            res %= 2
+            return res

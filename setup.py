@@ -104,7 +104,8 @@ info = {
     "provides": ["UnionFindPy"],
     "install_requires": requirements,
     "ext_modules": [CMakeExtension("_union_find_py")],
-    "cmdclass": {"build_ext": CMakeBuild}
+    "cmdclass": {"build_ext": CMakeBuild},
+    "ext_package": "UnionFindPy"
 }
 
 classifiers = [

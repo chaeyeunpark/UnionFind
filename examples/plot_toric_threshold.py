@@ -6,8 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils import repetition_code, toric_code_x_logicals, toric_code_x_stabilisers
-from union_find import Decoder
-
+from UnionFindPy import Decoder
 
 def num_decoding_failures(L, H, logicals, p, num_trials):
     decoder = Decoder(toric_code_x_stabilisers(L))
