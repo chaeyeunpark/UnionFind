@@ -4,8 +4,9 @@ sphinx:
   configuration: doc/conf.py
 
 python:
+  version: "3.8"
   install:
-    - requirements: doc/requirements.txt
+    - requirements: docs/requirements.txt
     - requirements: requirements.txt
     - method: pip
       path: .
@@ -18,3 +19,4 @@ build:
   apt_packages:
     - cmake
     - build-essential
+    - g++-10
