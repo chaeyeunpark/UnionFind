@@ -44,11 +44,12 @@ PYBIND11_MODULE(_union_find_py, m)
 			   py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
 			   py::array_t<int, py::array::c_style | py::array::forcecast> indptr)
 			{
-				if (num_parities <= 0)
+				if(num_parities <= 0)
 				{
-					throw std::invalid_argument("Number of partiy operators must be larger than 0");
+					throw std::invalid_argument(
+						"Number of partiy operators must be larger than 0");
 				}
-				if (num_qubits <= 0)
+				if(num_qubits <= 0)
 				{
 					throw std::invalid_argument("Number of qubits must be larger than 0");
 				}
@@ -64,15 +65,16 @@ PYBIND11_MODULE(_union_find_py, m)
 			   py::array_t<int, py::array::c_style | py::array::forcecast> indptr,
 			   int repetitions)
 			{
-				if (num_parities <= 0)
+				if(num_parities <= 0)
 				{
-					throw std::invalid_argument("Number of partiy operators must be larger than 0");
+					throw std::invalid_argument(
+						"Number of partiy operators must be larger than 0");
 				}
-				if (num_qubits <= 0)
+				if(num_qubits <= 0)
 				{
 					throw std::invalid_argument("Number of qubits must be larger than 0");
 				}
-				if (repetitions <= 1)
+				if(repetitions <= 1)
 				{
 					throw std::invalid_argument("Repetitions must be larger than 1");
 				}
@@ -110,7 +112,7 @@ PYBIND11_MODULE(_union_find_py, m)
 				py::capsule free_when_done(corrections, free_arr_uint32);
 
 				return py::array_t<uint32_t>({(int64_t)decoder.num_edges()}, corrections,
-										free_when_done);
+											 free_when_done);
 			},
 			"Decode the given syndroms");
 }

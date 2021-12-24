@@ -161,8 +161,8 @@ public:
 				auto edge = Edge{depth * layer_vertex_size + layer_vertex_idx,
 								 (depth + 1) * layer_vertex_size + layer_vertex_idx};
 				edge_idx_.emplace(edge,
-								  layer_vertex_idx + layer_num_qubits +
-								  (layer_num_qubits + layer_vertex_size) * depth);
+								  layer_vertex_idx + layer_num_qubits
+									  + (layer_num_qubits + layer_vertex_size) * depth);
 			}
 		}
 

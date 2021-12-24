@@ -60,9 +60,9 @@ auto toric_x_stabilizers_qubits_old(const uint32_t Lx, const uint32_t Ly, uint32
 template<class ContainerType1, class ContainerType2>
 auto have_same_elts(const ContainerType1& c1, const ContainerType2& c2) -> bool
 {
-	static_assert(std::is_same_v<typename ContainerType1::value_type, 
-			typename ContainerType2::value_type>,
-			"Two container types must have the same value_type");
+	static_assert(std::is_same_v<typename ContainerType1::value_type,
+								 typename ContainerType2::value_type>,
+				  "Two container types must have the same value_type");
 	using T = typename ContainerType1::value_type;
 	std::set<T> s1(c1.begin(), c1.end());
 	std::set<T> s2(c2.begin(), c2.end());
@@ -70,7 +70,8 @@ auto have_same_elts(const ContainerType1& c1, const ContainerType2& c2) -> bool
 	return s1 == s2;
 }
 
-template<UnionFindCPP::LatticeConcept LatticeType1, UnionFindCPP::LatticeConcept LatticeType2>
+template<UnionFindCPP::LatticeConcept LatticeType1,
+		 UnionFindCPP::LatticeConcept LatticeType2>
 void check_same_lattice(const LatticeType1& lattice1, const LatticeType2& lattice2)
 {
 	REQUIRE(lattice1.num_vertices() == lattice2.num_vertices());
@@ -78,13 +79,15 @@ void check_same_lattice(const LatticeType1& lattice1, const LatticeType2& lattic
 
 	for(uint32_t v = 0; v < lattice1.num_vertices(); ++v)
 	{
-		REQUIRE(lattice1.vertex_connection_count(v) == lattice2.vertex_connection_count(v));
-		REQUIRE(have_same_elts(lattice1.vertex_connections(v), lattice2.vertex_connections(v)));
+		REQUIRE(lattice1.vertex_connection_count(v)
+				== lattice2.vertex_connection_count(v));
+		REQUIRE(have_same_elts(lattice1.vertex_connections(v),
+							   lattice2.vertex_connections(v)));
 	}
 
 	for(uint32_t v = 0; v < lattice1.num_vertices(); ++v)
 	{
-		for(uint32_t v2: lattice2.vertex_connections(v))
+		for(uint32_t v2 : lattice2.vertex_connections(v))
 		{
 			REQUIRE(lattice1.edge_idx({v, v2}) == lattice2.edge_idx({v, v2}));
 		}
@@ -94,15 +97,14 @@ void check_same_lattice(const LatticeType1& lattice1, const LatticeType2& lattic
 /**
  * @brief generate a parity matrix for a prepetition code
  */
-auto repetition_code(uint32_t L) ->
-Eigen::SparseMatrix<uint32_t, Eigen::RowMajor>
+auto repetition_code(uint32_t L) -> Eigen::SparseMatrix<uint32_t, Eigen::RowMajor>
 {
 	Eigen::SparseMatrix<uint32_t, Eigen::RowMajor> m(L, L);
-	m.reserve(2*L);
+	m.reserve(2 * L);
 	for(uint32_t l = 0; l < L; ++l)
 	{
 		m.insert(l, l) = 1;
-		m.insert(l, (l+1) % L) = 1;
+		m.insert(l, (l + 1) % L) = 1;
 	}
 	m.makeCompressed();
 	return m;
@@ -117,7 +119,7 @@ auto toric_x_stabilizers_qubits_new(const uint32_t L)
 	SpMatu HrId = Eigen::kroneckerProduct(Hr, Id);
 	SpMatu IdHr = Eigen::kroneckerProduct(Id, Hr.transpose());
 
-	SpMatu H(L*L, 2*L*L);
+	SpMatu H(L * L, 2 * L * L);
 
 	for(int k = 0; k < HrId.outerSize(); ++k)
 	{
@@ -131,7 +133,7 @@ auto toric_x_stabilizers_qubits_new(const uint32_t L)
 	{
 		for(SpMatu::InnerIterator it(IdHr, k); it; ++it)
 		{
-			H.coeffRef(it.row(), it.col() + L*L) = it.value();
+			H.coeffRef(it.row(), it.col() + L * L) = it.value();
 		}
 	}
 
@@ -139,7 +141,6 @@ auto toric_x_stabilizers_qubits_new(const uint32_t L)
 
 	return H;
 }
-
 
 TEST_CASE("Test internal functions", "[internal]")
 {
@@ -163,7 +164,6 @@ TEST_CASE("Test whether the constructed lattice is correct for a toric code (2D)
 {
 	std::random_device rd;
 	std::default_random_engine re{rd()};
-	
 
 	SECTION("Lx=4, Ly=2, old indexing")
 	{
@@ -188,14 +188,22 @@ TEST_CASE("Test whether the constructed lattice is correct for a toric code (2D)
 
 		auto lattice
 			= LatticeFromParity(Lx * Ly, 2 * Lx * Ly, col_indices.data(), indptr.data());
-		REQUIRE(have_same_elts(lattice.vertex_connections(0), std::vector<uint32_t>{1, 3, 4}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(1), std::vector<uint32_t>{0, 2, 5}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(2), std::vector<uint32_t>{1, 3, 6}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(3), std::vector<uint32_t>{0, 2, 7}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(4), std::vector<uint32_t>{0, 5, 7}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(5), std::vector<uint32_t>{1, 4, 6}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(6), std::vector<uint32_t>{2, 5, 7}));
-		REQUIRE(have_same_elts(lattice.vertex_connections(7), std::vector<uint32_t>{3, 4, 6}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(0),
+							   std::vector<uint32_t>{1, 3, 4}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(1),
+							   std::vector<uint32_t>{0, 2, 5}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(2),
+							   std::vector<uint32_t>{1, 3, 6}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(3),
+							   std::vector<uint32_t>{0, 2, 7}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(4),
+							   std::vector<uint32_t>{0, 5, 7}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(5),
+							   std::vector<uint32_t>{1, 4, 6}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(6),
+							   std::vector<uint32_t>{2, 5, 7}));
+		REQUIRE(have_same_elts(lattice.vertex_connections(7),
+							   std::vector<uint32_t>{3, 4, 6}));
 	}
 
 	SECTION("L=7 to 127, old indexing")
@@ -233,10 +241,11 @@ TEST_CASE("Test whether the constructed lattice is correct for a toric code (2D)
 				uint32_t vertex = row * L + col;
 				REQUIRE(lattice.vertex_connection_count(vertex) == 4);
 
-				REQUIRE(
-					have_same_elts(lattice.vertex_connections(vertex),
-								  std::vector<uint32_t>{to_vertex(row - 1, col), to_vertex(row + 1, col),
-								   to_vertex(row, col + 1), to_vertex(row, col - 1)}));
+				REQUIRE(have_same_elts(lattice.vertex_connections(vertex),
+									   std::vector<uint32_t>{to_vertex(row - 1, col),
+															 to_vertex(row + 1, col),
+															 to_vertex(row, col + 1),
+															 to_vertex(row, col - 1)}));
 				REQUIRE(lattice.edge_idx({to_vertex(row, col), to_vertex(row, col + 1)})
 						== 2 * row * L + col);
 				REQUIRE(lattice.edge_idx({to_vertex(row, col), to_vertex(row + 1, col)})
@@ -248,11 +257,11 @@ TEST_CASE("Test whether the constructed lattice is correct for a toric code (2D)
 	SECTION("L=7 to 127, new indexing")
 	{
 		using UnionFindCPP::Lattice2D;
-		for(uint32_t L: {7, 15, 31, 63})
+		for(uint32_t L : {7, 15, 31, 63})
 		{
 			auto H = toric_x_stabilizers_qubits_new(L);
-			auto lattice_from_H = LatticeFromParity(H.rows(), H.cols(),
-					H.innerIndexPtr(), H.outerIndexPtr());
+			auto lattice_from_H = LatticeFromParity(H.rows(), H.cols(), H.innerIndexPtr(),
+													H.outerIndexPtr());
 			auto lattice2d = Lattice2D(L);
 
 			check_same_lattice(lattice_from_H, lattice2d);
@@ -263,16 +272,15 @@ TEST_CASE("Test whether the constructed lattice is correct for a toric code (2D)
 TEST_CASE("Test whether the constructed lattice is correct for a toric code (3D)",
 		  "[LatticeFromParity]")
 {
-
 	SECTION("L=7 to 127, new indexing")
 	{
 		using UnionFindCPP::LatticeCubic;
-		for(uint32_t L: {3, 7, 15})
+		for(uint32_t L : {3, 7, 15})
 		{
 			auto H = toric_x_stabilizers_qubits_new(L);
-			auto lattice_from_H = LatticeFromParity(H.rows(), H.cols(),
-					H.innerIndexPtr(), H.outerIndexPtr(),
-					/*repetitions = */ L);
+			auto lattice_from_H = LatticeFromParity(H.rows(), H.cols(), H.innerIndexPtr(),
+													H.outerIndexPtr(),
+													/*repetitions = */ L);
 			auto lattice3d = LatticeCubic(L);
 
 			check_same_lattice(lattice_from_H, lattice3d);
