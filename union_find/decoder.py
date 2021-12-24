@@ -9,7 +9,7 @@ class Decoder:
     :param parity_matrix (scipy.sparse.csr_matrix): a parity matrix in CSR format
     """
 
-    def __init__(self, parity_matrix):
+    def __init__(self, parity_matrix, repetitions = None):
         """Create a decoder from a parity matrix"""
 
         if not isinstance(parity_matrix, csr_matrix):
@@ -21,8 +21,13 @@ class Decoder:
         if not np.all(parity_matrix.data == 1):
             raise ValueError('Any non-zero value of the partiy matrix must be 1.')
         
-        self._decoder = DecoderFromParity(parity_matrix.shape[0], 
-                parity_matrix.shape[1], parity_matrix.indices, parity_matrix.indptr)
+        if repetitions is None:
+            self._decoder = DecoderFromParity(parity_matrix.shape[0], 
+                    parity_matrix.shape[1], parity_matrix.indices, parity_matrix.indptr)
+        else:
+            self._decoder = DecoderFromParity(parity_matrix.shape[0], 
+                    parity_matrix.shape[1], parity_matrix.indices, parity_matrix.indptr,
+                    repetitions)
 
     def decode(self, syndrome_arr):
         """Decode a given syndrome array.

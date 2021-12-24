@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
+
 #include "LatticeConcept.hpp"
 #include "RootManager.hpp"
 #include "utility.hpp"
@@ -35,7 +36,7 @@ namespace UnionFindCPP
 template<LatticeConcept Lattice> class Decoder
 {
 public:
-	using Vertex = int;
+	using Vertex = uint32_t;
 	using RootIterator = tsl::robin_set<Vertex>::const_iterator;
 
 private:
@@ -44,7 +45,8 @@ private:
 	/* index: vertex */
 	std::vector<Vertex> connection_counts_;
 
-	std::vector<int> support_; // Basically can be a map from Edge to int
+	/* index: edge index */
+	std::vector<uint32_t> support_;
 	std::deque<Edge> fuse_list_;
 
 	/* index: vertex */
@@ -57,16 +59,16 @@ private:
 	/* Data for peeling */
 	std::deque<Edge> peeling_edges_;
 
-	void init_cluster(const std::vector<int>& roots)
+	void init_cluster(const std::vector<uint32_t>& roots)
 	{
 		connection_counts_ = std::vector<Vertex>(lattice_.num_vertices(), 0);
-		support_ = std::vector<int>(lattice_.num_edges(), 0);
+		support_ = std::vector<uint32_t>(lattice_.num_edges(), 0);
 		mgr_.initialize_roots(roots);
 		for(auto root : roots) { border_vertices_[root].emplace(root); }
 
 		root_of_vertex_.resize(lattice_.num_vertices());
 
-		for(int u = 0; u < lattice_.num_vertices(); ++u) { root_of_vertex_[u] = u; }
+		for(uint32_t u = 0; u < lattice_.num_vertices(); ++u) { root_of_vertex_[u] = u; }
 	}
 
 	void grow(Vertex root)
@@ -77,8 +79,8 @@ private:
 			{
 				auto edge = Edge(border_vertex, v);
 
-				int& elt = support_[lattice_.edge_idx(edge)];
-				if(elt == 2) continue;
+				auto& elt = support_[lattice_.edge_idx(edge)];
+				if(elt == 2) { continue; }
 				if(++elt == 2)
 				{
 					connection_counts_[edge.u]++;
@@ -89,13 +91,13 @@ private:
 		}
 	}
 
-	Vertex find_root(Vertex vertex)
+	auto find_root(Vertex vertex) -> Vertex
 	{
 		Vertex tmp = root_of_vertex_[vertex];
-		if(tmp == vertex) return vertex;
+		if(tmp == vertex) { return vertex; }
 
 		std::vector<Vertex> path;
-		Vertex root;
+		Vertex root{};
 		do {
 			root = tmp;
 			path.emplace_back(root);
@@ -140,7 +142,7 @@ private:
 			peeling_edges_.push_back(fuse_edge);
 
 			// let the size of the cluster of root1 be larger than that of root2
-			if(mgr_.size(root1) < mgr_.size(root2)) std::swap(root1, root2);
+			if(mgr_.size(root1) < mgr_.size(root2)) { std::swap(root1, root2); }
 
 			root_of_vertex_[root2] = root1;
 
@@ -157,9 +159,11 @@ private:
 		}
 	}
 
-	std::vector<Edge> peeling(std::vector<int>& syndromes)
+	auto peeling(std::vector<uint32_t>& syndromes) -> std::vector<Edge>
 	{
 		std::vector<Edge> corrections;
+
+		// vs vector?
 		tsl::robin_map<Vertex, int> vertex_count;
 
 		for(Edge edge : peeling_edges_)
@@ -172,7 +176,8 @@ private:
 		{
 			Edge leaf_edge = peeling_edges_.back();
 			peeling_edges_.pop_back();
-			Vertex u, v;
+			auto u = Vertex{};
+			auto v = Vertex{};
 			if(vertex_count[leaf_edge.u] == 1)
 			{
 				u = leaf_edge.u;
@@ -195,21 +200,21 @@ private:
 			if(syndromes[u] == 1)
 			{
 				corrections.emplace_back(leaf_edge);
-				--syndromes[u];
-				syndromes[v] = 1 - syndromes[v];
+				syndromes[u] = 0;
+				syndromes[v] ^= 1U;
 			}
 		}
 		return corrections;
 	}
 
 public:
-	template<typename... Args> Decoder(Args&&... args) : lattice_{args...} { }
+	template<typename... Args> explicit Decoder(Args&&... args) : lattice_{args...} { }
 
-	std::vector<Edge> decode(std::vector<int>& syndromes)
+	auto decode(std::vector<uint32_t>& syndromes) -> std::vector<Edge>
 	{
 		assert(syndromes.size() == lattice_.num_vertices());
 		std::vector<Vertex> syndrome_vertices;
-		for(int n = 0; n < syndromes.size(); ++n)
+		for(uint32_t n = 0; n < syndromes.size(); ++n)
 		{
 			if((syndromes[n] % 2) != 0) { syndrome_vertices.emplace_back(n); }
 		}
@@ -225,11 +230,17 @@ public:
 		return peeling(syndromes);
 	}
 
-	inline int num_vertices() const { return lattice_.num_vertices(); }
+	[[nodiscard]] inline auto num_vertices() const -> int
+	{
+		return lattice_.num_vertices();
+	}
 
-	inline int num_edges() const { return lattice_.num_edges(); }
+	[[nodiscard]] inline auto num_edges() const -> int { return lattice_.num_edges(); }
 
-	inline int edge_idx(const Edge& edge) const { return lattice_.edge_idx(edge); }
+	[[nodiscard]] inline auto edge_idx(const Edge& edge) const -> int
+	{
+		return lattice_.edge_idx(edge);
+	}
 
 	void clear()
 	{

@@ -19,24 +19,25 @@
 
 namespace UnionFindCPP
 {
-auto z_error_to_syndrome_x(const int L, const Eigen::ArrayXi& z_error) -> std::vector<int>
+auto z_error_to_syndrome_x(const uint32_t L, const ArrayXu& z_error)
+	-> std::vector<uint32_t>
 {
-	std::vector<int> syndromes_array(L * L, 0);
+	std::vector<uint32_t> syndromes_array(L * L, 0U);
 	for(int n = 0; n < 2 * L * L; ++n)
 	{
 		if(z_error[n] == 0) { continue; }
 		Edge e = to_edge(L, n);
-		syndromes_array[e.u] += 1;
-		syndromes_array[e.v] += 1;
+		syndromes_array[e.u] ^= 1U;
+		syndromes_array[e.v] ^= 1U;
 	}
-	for(auto& u : syndromes_array) { u %= 2; }
 
 	return syndromes_array;
 }
 
-auto x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_error) -> std::vector<int>
+auto x_error_to_syndrome_z(const uint32_t L, const ArrayXu& x_error)
+	-> std::vector<uint32_t>
 {
-	std::vector<int> syndromes_array(L * L, 0);
+	std::vector<uint32_t> syndromes_array(L * L, 0U);
 	for(int n = 0; n < 2 * L * L; ++n)
 	{
 		if(x_error[n] == 0) { continue; }
@@ -46,22 +47,21 @@ auto x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_error) -> std::v
 		{
 			auto u = left(L, e);
 			const auto [row, col] = vertex_to_coord(L, u);
-			syndromes_array[u] += 1;
-			syndromes_array[to_vertex_index(L, row - 1, col)] += 1;
+			syndromes_array[u] ^= 1U;
+			syndromes_array[to_vertex_index(L, row - 1, col)] ^= 1U;
 		}
 		else
 		{
 			auto u = lower(L, e);
 			const auto [row, col] = vertex_to_coord(L, u);
-			syndromes_array[u] += 1;
-			syndromes_array[to_vertex_index(L, row, col - 1)] += 1;
+			syndromes_array[u] ^= 1U;
+			syndromes_array[to_vertex_index(L, row, col - 1)] ^= 1U;
 		}
 	}
-	for(auto& u : syndromes_array) { u %= 2; }
 	return syndromes_array;
 }
 
-auto decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type) -> int
+auto decoder_edge_to_qubit_idx(const uint32_t L, Edge e, ErrorType error_type) -> uint32_t
 {
 	switch(error_type)
 	{
@@ -85,10 +85,10 @@ auto decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type) -> int
 	__builtin_unreachable();
 }
 
-auto to_edge(const int L, int edge_index) -> Edge
+auto to_edge(const uint32_t L, uint32_t edge_index) -> Edge
 {
-	int row = edge_index / L; // % L is done in to_vertex_index
-	int col = edge_index % L;
+	uint32_t row = edge_index / L; // % L is done in to_vertex_index
+	uint32_t col = edge_index % L;
 	if((edge_index / (L * L)) == 0) // vertical edge
 	{
 		return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row - 1, col));
@@ -97,14 +97,14 @@ auto to_edge(const int L, int edge_index) -> Edge
 	return Edge(to_vertex_index(L, row, col), to_vertex_index(L, row, col + 1));
 }
 
-auto calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors,
-					ErrorType error_type) -> std::vector<int>
+auto calc_syndromes(const LatticeCubic& lattice, const ArrayXXu& errors,
+					ErrorType error_type) -> std::vector<uint32_t>
 {
-	const int L = lattice.getL();
-	std::vector<int> syndromes(lattice.num_vertices());
-	for(int h = 0; h < L; ++h)
+	const uint32_t L = lattice.getL();
+	std::vector<uint32_t> syndromes(lattice.num_vertices());
+	for(uint32_t h = 0; h < L; ++h)
 	{
-		Eigen::ArrayXi layer_error = errors.col(h);
+		ArrayXu layer_error = errors.col(h);
 		auto layer_syndrome = [L, error_type, &layer_error]
 		{
 			switch(error_type)
@@ -123,8 +123,8 @@ auto calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors,
 	return syndromes;
 }
 
-void add_corrections(const int L, const std::vector<Edge>& corrections,
-					 Eigen::ArrayXi& error, ErrorType error_type)
+void add_corrections(const uint32_t L, const std::vector<Edge>& corrections,
+					 ArrayXu& error, ErrorType error_type)
 {
 	for(auto e : corrections)
 	{
@@ -133,28 +133,28 @@ void add_corrections(const int L, const std::vector<Edge>& corrections,
 	}
 }
 
-auto logical_error(const int L, const Eigen::ArrayXi& error, ErrorType error_type) -> bool
+auto logical_error(const uint32_t L, const ArrayXu& error, ErrorType error_type) -> bool
 {
 	// one may use a counting algorithm for testing logical error
-	int sum1 = 0;
-	int sum2 = 0;
+	uint32_t sum1 = 0;
+	uint32_t sum2 = 0;
 	switch(error_type)
 	{
 	case ErrorType::X:
 		// need to think in a dual lattice
-		for(int u = 0; u < L * L; u += L) { sum1 += error[u]; }
-		for(int u = L * L; u < L * L + L; ++u) { sum2 += error[u]; }
+		for(uint32_t u = 0; u < L * L; u += L) { sum1 += error[u]; }
+		for(uint32_t u = L * L; u < L * L + L; ++u) { sum2 += error[u]; }
 		break;
 	case ErrorType::Z:
-		for(int u = 0; u < L; ++u) { sum1 += error[u]; }
-		for(int u = L * L; u < 2 * L * L; u += L) { sum2 += error[u]; }
+		for(uint32_t u = 0; u < L; ++u) { sum1 += error[u]; }
+		for(uint32_t u = L * L; u < 2 * L * L; u += L) { sum2 += error[u]; }
 		break;
 	}
 
 	return (sum1 % 2 == 1) || (sum2 % 2 == 1);
 }
 
-auto has_logical_error(int L, Eigen::ArrayXi& error_total,
+auto has_logical_error(uint32_t L, ArrayXu& error_total,
 					   const std::vector<Edge>& corrections, ErrorType error_type) -> bool
 {
 	for(auto edge : corrections)
@@ -162,7 +162,7 @@ auto has_logical_error(int L, Eigen::ArrayXi& error_total,
 		if(edge.u / (L * L) == edge.v / (L * L)) // edge is spacelike
 		{
 			auto corr_edge = Edge{edge.u % (L * L), edge.v % (L * L)};
-			int corr_qubit = decoder_edge_to_qubit_idx(L, corr_edge, error_type);
+			uint32_t corr_qubit = decoder_edge_to_qubit_idx(L, corr_edge, error_type);
 			error_total[corr_qubit] += 1;
 		}
 	}

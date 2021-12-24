@@ -16,15 +16,10 @@
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#ifdef USE_MPI
-#pragma message("Build with MPI")
-#include <mpi.h>
-#endif
+#include <cstdint>
+#include <utility>
 
-#include <span>
-
-class Runner
-{
-public:
-	void parse_args(std::span<char*> args) { }
-};
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
+auto parse_args(int argc, const char* const argv[]) -> std::pair<uint32_t, double>;
+void save_to_json(uint32_t L, double p, double avg_dur_in_microseconds,
+				  double avg_success);

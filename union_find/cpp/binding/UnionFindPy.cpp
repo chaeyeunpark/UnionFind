@@ -34,16 +34,15 @@ void free_int_arr(void* p)
 
 namespace py = pybind11;
 
-
 // NOLINTNEXTLINE(cppcoreguidelines-*)
 PYBIND11_MODULE(_union_find_py, m)
 {
 	using UnionFindFromParity = UnionFindCPP::Decoder<UnionFindCPP::LatticeFromParity>;
 	py::class_<UnionFindFromParity>(m, "DecoderFromParity")
 		.def(py::init(
-			[](int num_parities, int num_qubits, 
-				py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
-				py::array_t<int, py::array::c_style | py::array::forcecast> indptr)
+			[](int num_parities, int num_qubits,
+			   py::array_t<int, py::array::c_style | py::array::forcecast> col_indices,
+			   py::array_t<int, py::array::c_style | py::array::forcecast> indptr)
 			{
 				// check the given dimension is correct
 				return UnionFindFromParity(num_parities, num_qubits,

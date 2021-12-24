@@ -7,9 +7,26 @@ To compile C++ examples, you may run
 
 .. code-block:: shell
 
-    cd union_find/cpp
-    mkdir build && cd build
-    cmake -DBUILD_EXAMPLES=ON ..
-    make
+    $ cd union_find/cpp
+    $ mkdir build && cd build
+    $ cmake -DBUILD_EXAMPLES=ON ..
+    $ make
 
 Other supported ``cmake`` options are  ``-DENABLE_AVX=ON``, ``-DBUILD_TESTS=ON``, ``-DCLANG_TIDY``.
+
+
+For a contribution, I ask you install ``clang-tidy-12`` and ``clang-format-12``. You can format C++ source files with:
+
+.. code-block:: shell
+
+    $ cd union_find/cpp
+    $ make format
+
+where ``clang-tidy`` can be called with:
+
+.. code-block:: shell
+
+    $ cd union_find/cpp
+    $ mkdir build && cd build
+    $ cmake -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCLANG_TIDY=ON ..
+    $ make

@@ -25,38 +25,42 @@ namespace UnionFindCPP
 class LatticeCubic
 {
 private:
-	const int L_;
+	const uint32_t L_;
 
-	inline int to_vertex_index(int row, int col, int h) const
+	[[nodiscard]] inline auto to_vertex_index(uint32_t row, uint32_t col,
+											  uint32_t h) const -> uint32_t
 	{
 		return UnionFindCPP::to_vertex_index(L_, row, col) + h * (L_ * L_);
 	}
 
 public:
-	using Vertex = int;
+	using Vertex = uint32_t;
 
-	explicit LatticeCubic(int L) : L_{L} { }
+	explicit LatticeCubic(uint32_t L) : L_{L} { }
 
-	inline int getL() const { return L_; }
+	[[nodiscard]] inline auto getL() const -> uint32_t { return L_; }
 
-	constexpr int vertex_connection_count(Vertex v) const
+	[[nodiscard]] constexpr auto vertex_connection_count(Vertex v) const -> uint32_t
 	{
-		int L = L_;
+		uint32_t L = L_;
 
-		int h = v / (L * L);
+		uint32_t h = v / (L * L);
 
-		if(h == L - 1 || h == 0) return 5;
+		if(h == L - 1 || h == 0)
+		{
+			return 5; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+		}
 
-		return 6;
+		return 6; // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 	}
 
-	std::vector<Vertex> vertex_connections(Vertex v) const
+	[[nodiscard]] auto vertex_connections(Vertex v) const -> std::vector<Vertex>
 	{
-		int L = L_;
+		uint32_t L = L_;
 
-		int h = v / (L * L);
-		int row = (v / L) % L;
-		int col = v % L;
+		uint32_t h = v / (L * L);
+		uint32_t row = (v / L) % L;
+		uint32_t col = v % L;
 
 		auto res = std::vector<Vertex>{
 			to_vertex_index(row - 1, col, h),
@@ -64,46 +68,49 @@ public:
 			to_vertex_index(row, col - 1, h),
 			to_vertex_index(row, col + 1, h),
 		};
-		if(h < L - 1) res.emplace_back(to_vertex_index(row, col, h + 1));
-		if(h > 0) res.emplace_back(to_vertex_index(row, col, h - 1));
+		if(h < L - 1) { res.emplace_back(to_vertex_index(row, col, h + 1)); }
+		if(h > 0) { res.emplace_back(to_vertex_index(row, col, h - 1)); }
 
 		return res;
 	}
 
-	inline int num_vertices() const { return L_ * L_ * L_; }
+	[[nodiscard]] inline auto num_vertices() const -> uint32_t { return L_ * L_ * L_; }
 
-	inline int num_edges() const { return 3 * L_ * L_ * L_ - L_ * L_; }
-
-	inline int edge_idx(const Edge& edge) const
+	[[nodiscard]] inline auto num_edges() const -> uint32_t
 	{
-		int L = L_;
-		int uh = edge.u / (L * L);
+		return 3 * L_ * L_ * L_ - L_ * L_;
+	}
+
+	[[nodiscard]] inline auto edge_idx(const Edge& edge) const -> uint32_t
+	{
+		uint32_t L = L_;
+		uint32_t uh = edge.u / (L * L);
 
 		if((edge.u / (L * L)) == (edge.v / (L * L))) // edge is spacelike
 		{
 			return to_edge_idx(L, Edge{edge.u % (L * L), edge.v % (L * L)})
 				   + 3 * L * L * uh;
 		}
-
-		{ // edge is in the time direction
-			int row = (edge.u / L) % L;
-			int col = edge.u % L;
+		else
+		{ // NOLINT(llvm-else-after-return,readability-else-after-return)
+			uint32_t row = (edge.u / L) % L;
+			uint32_t col = edge.u % L;
 			return 3 * L * L * uh + 2 * L * L + L * row + col;
 		}
 	}
 
-	Edge to_edge(int edge_index) const
+	[[nodiscard]] auto to_edge(int edge_index) const -> Edge
 	{
-		int L = L_;
-		int h = edge_index / (3 * L * L);
-		int layer_idx = edge_index % (3 * L * L);
+		uint32_t L = L_;
+		uint32_t h = edge_index / (3 * L * L);
+		uint32_t layer_idx = edge_index % (3 * L * L);
 		if(layer_idx >= 2 * L * L) // edge is in the time direction
 		{
 			auto [row, col] = UnionFindCPP::vertex_to_coord(L, layer_idx - 2 * L * L);
 			return Edge{to_vertex_index(row, col, h), to_vertex_index(row, col, h + 1)};
 		}
-		else // edge is spacelike
-		{
+		else
+		{ // NOLINT(llvm-else-after-return,readability-else-after-return)
 			Edge e_2d = UnionFindCPP::to_edge(L, layer_idx);
 			return Edge{e_2d.u + h * L * L, e_2d.v + h * L * L};
 		}

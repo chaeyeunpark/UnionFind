@@ -18,10 +18,10 @@
 #include "LatticeCubic.hpp"
 #include "LazyDecoder.hpp"
 #include "error_utils.hpp"
+#include "runner_utils.hpp"
 #include "toric_utils.hpp"
 
 #include <Eigen/Dense>
-#include <fmt/core.h>
 #ifdef USE_MPI
 #pragma message("Build with MPI")
 #include <mpi.h>
@@ -32,30 +32,20 @@
 #include <fstream>
 #include <iostream>
 #include <random>
-#include <span>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char* argv[]) -> int
 {
 	namespace chrono = std::chrono;
-	using UnionFindCPP::Decoder, UnionFindCPP::ErrorType, UnionFindCPP::LatticeCubic,
-		UnionFindCPP::LazyDecoder, UnionFindCPP::NoiseType,
+	using UnionFindCPP::ArrayXu, UnionFindCPP::Decoder, UnionFindCPP::ErrorType,
+		UnionFindCPP::LatticeCubic, UnionFindCPP::LazyDecoder, UnionFindCPP::NoiseType,
 		UnionFindCPP::add_measurement_noise, UnionFindCPP::add_corrections,
 		UnionFindCPP::layer_syndrome_diff;
 
-	auto args = std::span(argv, size_t(argc));
 	const auto noise_type = NoiseType::X;
 	const uint32_t n_iter = 1'000'000;
 
 	int mpi_rank = 0;
 	int mpi_size = 1;
-
-	constexpr int p_precision = 5;
-	auto p_format = [](double p) -> long
-	{
-		// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-		return std::lround(p * std::pow(10, p_precision));
-	};
 
 #ifdef USE_MPI
 	MPI_Init(&argc, &argv);
@@ -63,40 +53,20 @@ auto main(int argc, char* argv[]) -> int
 	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-
-	if(argc != 3)
-	{
-		fmt::print("Usage: {} L p\n", args[0]);
-		return 1;
-	}
-
-	int L = 0;
+	uint32_t L = 0;
 	double p = 0.0;
-
 	try
 	{
-		L = std::stoi(args[1]);
-		p = std::stod(args[2]);
+		std::tie(L, p) = parse_args(argc, argv);
 	}
 	catch(std::exception& e)
 	{
-		std::cerr << e.what() << std::endl;
+		std::cout << e.what() << std::endl;
 		return 1;
 	}
 
-	if(L < 0)
-	{
-		fmt::print("Error: L must be positive\n");
-		return 1;
-	}
-
-	if(!((p > 0.0) && (p < 1.0)))
-	{
-		fmt::print("Error: p must be in between 0.0 and 1.0\n");
-		return 1;
-	}
+	std::random_device rd;
+	std::default_random_engine re{rd()};
 
 #ifdef USE_MPI
 	fmt::print(stderr, "Processing at rank = {}, size = {}\n", mpi_rank, mpi_size);
@@ -115,12 +85,12 @@ auto main(int argc, char* argv[]) -> int
 
 		auto synd_x = calc_syndromes(lattice, error_x, ErrorType::X);
 
-		Eigen::ArrayXi error_total_x = error_x.col(L - 1);
+		ArrayXu error_total_x = error_x.col(L - 1);
 
 		const auto [measurement_error_x, measurement_error_z]
 			= create_measurement_errors(re, L * L, L, p, noise_type);
 
-		add_measurement_noise(L, re, synd_x, measurement_error_x);
+		add_measurement_noise(L, synd_x, measurement_error_x);
 
 		layer_syndrome_diff(L, synd_x);
 
@@ -170,16 +140,8 @@ auto main(int argc, char* argv[]) -> int
 
 	if(mpi_rank == 0)
 	{
-		std::string filename
-			= fmt::format("out_L{:d}_P{:0{}d}.json", L, p_format(p), p_precision + 1);
-		std::ofstream out_data(filename);
-		nlohmann::json out_j;
-		out_j["L"] = L;
-		out_j["average_microseconds"] = double(total_dur_in_microseconds) / n_iter;
-		out_j["p"] = p;
-		out_j["accuracy"] = double(total_success) / n_iter;
-
-		out_data << out_j.dump(0);
+		save_to_json(L, p, static_cast<double>(total_dur_in_microseconds) / n_iter,
+					 static_cast<double>(total_success) / n_iter);
 	}
 
 #ifdef USE_MPI

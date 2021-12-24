@@ -24,25 +24,29 @@ namespace UnionFindCPP
 class Lattice2D
 {
 private:
-	int L_;
+	uint32_t L_;
 
 public:
-	using Vertex = int;
+	using Vertex = uint32_t;
 
-	explicit Lattice2D(int L) : L_{L} { }
+	explicit Lattice2D(uint32_t L) : L_{L} { }
 
-	inline int to_vertex_index(int row, int col) const
+	[[nodiscard]] inline auto to_vertex_index(uint32_t row, uint32_t col) const
+		-> uint32_t
 	{
 		return UnionFindCPP::to_vertex_index(L_, row,
 											 col); // call function from the parent scope
 	}
 
-	constexpr int vertex_connection_count(Vertex v) const { return 4; }
-
-	std::array<Vertex, 4> vertex_connections(Vertex v) const
+	[[nodiscard]] constexpr static auto vertex_connection_count(Vertex /*v*/) -> uint32_t
 	{
-		int row = v / L_;
-		int col = v % L_;
+		return 4;
+	}
+
+	[[nodiscard]] auto vertex_connections(Vertex v) const -> std::array<Vertex, 4>
+	{
+		uint32_t row = v / L_;
+		uint32_t col = v % L_;
 
 		return {
 			to_vertex_index(row - 1, col),
@@ -52,13 +56,16 @@ public:
 		};
 	}
 
-	inline int num_vertices() const { return L_ * L_; }
+	[[nodiscard]] inline auto num_vertices() const -> uint32_t { return L_ * L_; }
 
-	inline int num_edges() const { return 2 * L_ * L_; }
+	[[nodiscard]] inline auto num_edges() const -> uint32_t { return 2 * L_ * L_; }
 
-	inline int edge_idx(const Edge& edge) const { return to_edge_idx(L_, edge); }
+	[[nodiscard]] inline auto edge_idx(const Edge& edge) const -> uint32_t
+	{
+		return to_edge_idx(L_, edge);
+	}
 
-	inline Edge to_edge(int edge_index) const
+	[[nodiscard]] inline auto to_edge(uint32_t edge_index) const -> Edge
 	{
 		return UnionFindCPP::to_edge(L_, edge_index);
 	}

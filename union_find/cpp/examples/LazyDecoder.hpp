@@ -27,7 +27,7 @@ private:
 	std::vector<Edge> all_edges_;
 
 public:
-	template<typename... Args> LazyDecoder(Args&&... args) : lattice_{args...}
+	template<typename... Args> explicit LazyDecoder(Args&&... args) : lattice_{args...}
 	{
 		const auto num_edges = lattice_.num_edges();
 
@@ -37,7 +37,7 @@ public:
 		}
 	}
 
-	std::pair<bool, std::vector<Edge>> decode(std::vector<int>& syndromes)
+	auto decode(std::vector<uint32_t>& syndromes) -> std::pair<bool, std::vector<Edge>>
 	{
 		std::vector<Edge> corrections;
 
@@ -45,18 +45,17 @@ public:
 		{
 			if(syndromes[edge.u] == 1 && syndromes[edge.v] == 1)
 			{
-				corrections.emplace_back(std::move(edge));
+				corrections.emplace_back(edge);
 			}
 		}
 
 		for(const auto& edge : corrections)
 		{
-			syndromes[edge.u] ^= 1;
-			syndromes[edge.v] ^= 1;
+			syndromes[edge.u] ^= 1U;
+			syndromes[edge.v] ^= 1U;
 		}
 
 		bool success = true;
-
 		for(const auto syndrome : syndromes)
 		{
 			if(syndrome == 1)
@@ -65,7 +64,6 @@ public:
 				break;
 			}
 		}
-
 		return std::make_pair(success, corrections);
 	}
 };

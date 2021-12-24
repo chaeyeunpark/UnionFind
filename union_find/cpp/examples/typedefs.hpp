@@ -14,24 +14,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
-#include <Eigen/Dense>
+#pragma once
 
-#include "error_utils.hpp"
-#include "utility.hpp"
+#include <Eigen/Dense>
 
 namespace UnionFindCPP
 {
-void add_measurement_noise(const uint32_t L, std::vector<uint32_t>& syndromes,
-						   const ArrayXXu& measurement_error)
-{
-	Eigen::Map<ArrayXXu> syndromes_map(syndromes.data(), L * L, L);
-	syndromes_map += measurement_error;
-}
-
-void layer_syndrome_diff(const uint32_t L, std::vector<uint32_t>& syndromes)
-{
-	Eigen::Map<ArrayXXu> syndromes_map(syndromes.data(), L * L, L);
-	for(int h = L - 1; h >= 1; --h) { syndromes_map.col(h) += syndromes_map.col(h - 1); }
-	syndromes_map = syndromes_map.unaryExpr([](uint32_t x) { return x % 2; });
-}
+using ArrayXu = Eigen::Array<uint32_t, Eigen::Dynamic, 1>;
+using ArrayXXu = Eigen::Array<uint32_t, Eigen::Dynamic, Eigen::Dynamic>;
 } // namespace UnionFindCPP

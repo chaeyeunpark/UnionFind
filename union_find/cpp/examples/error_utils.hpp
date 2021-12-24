@@ -20,6 +20,7 @@
 
 #include <Eigen/Dense>
 
+#include "typedefs.hpp"
 #include "utility.hpp"
 
 /**
@@ -38,11 +39,11 @@ enum class NoiseType
 };
 
 template<class RandomEngine>
-auto create_errors(RandomEngine& re, const int num_qubits, const double p,
-				   NoiseType noise_type) -> std::pair<Eigen::ArrayXi, Eigen::ArrayXi>
+auto create_errors(RandomEngine& re, const uint32_t num_qubits, const double p,
+				   NoiseType noise_type) -> std::pair<ArrayXu, ArrayXu>
 {
-	Eigen::ArrayXi x_error = Eigen::ArrayXi::Zero(num_qubits);
-	Eigen::ArrayXi z_error = Eigen::ArrayXi::Zero(num_qubits);
+	ArrayXu x_error = ArrayXu::Zero(num_qubits);
+	ArrayXu z_error = ArrayXu::Zero(num_qubits);
 	std::uniform_real_distribution<> urd(0.0, 1.0);
 
 	switch(noise_type)
@@ -52,7 +53,7 @@ auto create_errors(RandomEngine& re, const int num_qubits, const double p,
 		std::uniform_int_distribution<> uid(0, 2);
 		for(int i = 0; i < num_qubits; ++i)
 		{
-			if(!(urd(re) < p)) continue;
+			if(!(urd(re) < p)) { continue; }
 			switch(uid(re))
 			{
 			case 0:
@@ -88,11 +89,12 @@ auto create_errors(RandomEngine& re, const int num_qubits, const double p,
 }
 
 template<class RandomEngine>
-auto create_measurement_errors(RandomEngine& re, const int num_qubits,
-							   const int repetition, const double p, NoiseType noise_type)
+auto create_measurement_errors(RandomEngine& re, const uint32_t num_qubits,
+							   const uint32_t repetition, const double p,
+							   NoiseType noise_type)
 {
-	Eigen::ArrayXXi measurement_error_x = Eigen::ArrayXXi::Zero(num_qubits, repetition);
-	Eigen::ArrayXXi measurement_error_z = Eigen::ArrayXXi::Zero(num_qubits, repetition);
+	ArrayXXu measurement_error_x = ArrayXXu::Zero(num_qubits, repetition);
+	ArrayXXu measurement_error_z = ArrayXXu::Zero(num_qubits, repetition);
 	std::uniform_real_distribution<> urd(0.0, 1.0);
 
 	for(int h = 0; h < repetition - 1; ++h) // perfect measurement in the last round
@@ -107,12 +109,11 @@ auto create_measurement_errors(RandomEngine& re, const int num_qubits,
 }
 
 template<class RandomEngine>
-auto generate_errors(const int num_qubits, const int repetition, double p,
+auto generate_errors(const uint32_t num_qubits, const uint32_t repetition, double p,
 					 RandomEngine& re, NoiseType noise_type)
-	-> std::pair<Eigen::ArrayXXi, Eigen::ArrayXXi>
 {
-	Eigen::ArrayXXi qubit_errors_x = Eigen::ArrayXXi::Zero(num_qubits, repetition);
-	Eigen::ArrayXXi qubit_errors_z = Eigen::ArrayXXi::Zero(num_qubits, repetition);
+	ArrayXXu qubit_errors_x = ArrayXXu::Zero(num_qubits, repetition);
+	ArrayXXu qubit_errors_z = ArrayXXu::Zero(num_qubits, repetition);
 
 	for(int r = 0; r < repetition; ++r)
 	{
@@ -128,20 +129,15 @@ auto generate_errors(const int num_qubits, const int repetition, double p,
 		qubit_errors_x.col(h) += qubit_errors_x.col(h - 1);
 		qubit_errors_z.col(h) += qubit_errors_z.col(h - 1);
 	}
-	qubit_errors_x = qubit_errors_x.unaryExpr([](int x) { return x % 2; });
-	qubit_errors_z = qubit_errors_z.unaryExpr([](int x) { return x % 2; });
+	qubit_errors_x = qubit_errors_x.unaryExpr([](uint32_t x) { return x % 2; });
+	qubit_errors_z = qubit_errors_z.unaryExpr([](uint32_t x) { return x % 2; });
 
 	return std::make_pair(qubit_errors_x, qubit_errors_z);
 }
 
-template<typename RandomEngine>
-void add_measurement_noise(const int L, RandomEngine& re, std::vector<int>& syndromes,
-						   const Eigen::ArrayXXi& measurement_error)
-{
-	Eigen::Map<Eigen::ArrayXXi> syndromes_map(syndromes.data(), L * L, L);
-	syndromes_map += measurement_error;
-}
+void add_measurement_noise(uint32_t L, std::vector<uint32_t>& syndromes,
+						   const ArrayXXu& measurement_error);
 
-void layer_syndrome_diff(const int L, std::vector<int>& syndromes);
+void layer_syndrome_diff(uint32_t L, std::vector<uint32_t>& syndromes);
 
 } // namespace UnionFindCPP

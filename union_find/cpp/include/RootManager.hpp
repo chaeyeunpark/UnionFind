@@ -25,7 +25,7 @@
 class RootManager
 {
 public:
-	using Vertex = int;
+	using Vertex = uint32_t;
 
 private:
 	/* set of roots */
@@ -33,9 +33,9 @@ private:
 	/* set of roots with odd parity */
 	tsl::robin_set<Vertex> odd_roots_; // root size comb
 	/* key: root, value: size of the cluster */
-	tsl::robin_map<Vertex, int> size_;
+	tsl::robin_map<Vertex, uint32_t> size_;
 	/* key: root, value: parity of the cluster */
-	tsl::robin_map<Vertex, int> parity_;
+	tsl::robin_map<Vertex, uint32_t> parity_;
 
 public:
 	class SizeProxy
@@ -47,20 +47,21 @@ public:
 	public:
 		SizeProxy(RootManager& mgr, Vertex root) : mgr_{mgr}, root_{root} { }
 
-		operator int() const
+		// NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+		operator uint32_t() const
 		{
-			if(!mgr_.is_root(root_)) return 0;
+			if(!mgr_.is_root(root_)) { return 0; }
 			const auto it = mgr_.size_.find(root_);
 			return it->second;
 		}
 
-		SizeProxy& operator=(int new_size)
+		auto operator=(int new_size) -> SizeProxy&
 		{
 			mgr_.size_[root_] = new_size;
 			return *this;
 		}
 
-		SizeProxy& operator++()
+		auto operator++() -> SizeProxy&
 		{
 			auto it = mgr_.size_.find(root_);
 			++it.value();
@@ -86,25 +87,31 @@ public:
 		}
 	}
 
-	inline SizeProxy size(Vertex root) { return SizeProxy(*this, root); }
+	inline auto size(Vertex root) -> SizeProxy { return SizeProxy(*this, root); }
 
-	inline int size(Vertex root) const
+	[[nodiscard]] inline auto size(Vertex root) const -> uint32_t
 	{
-		if(!is_root(root)) return 0;
+		if(!is_root(root)) { return 0; }
 		const auto it = size_.find(root);
 		return it->second;
 	}
 
-	inline int parity(Vertex root) const
+	[[nodiscard]] inline auto parity(Vertex root) const -> uint32_t
 	{
 		auto it = parity_.find(root);
-		if(it == parity_.end()) return 0;
+		if(it == parity_.end()) { return 0; }
 		return it->second;
 	}
 
-	inline bool is_root(Vertex v) const { return roots_.count(v) == 1; }
+	[[nodiscard]] inline auto is_root(Vertex v) const -> bool
+	{
+		return roots_.count(v) == 1;
+	}
 
-	inline bool is_odd_root(Vertex v) const { return odd_roots_.count(v) == 1; }
+	[[nodiscard]] inline auto is_odd_root(Vertex v) const -> bool
+	{
+		return odd_roots_.count(v) == 1;
+	}
 
 	// size of the cluster of root1 is larger than that of root2
 	void merge(Vertex root1, Vertex root2)
@@ -135,18 +142,21 @@ public:
 		parity_.erase(root);
 	}
 
-	bool isempty_odd_root() const { return odd_roots_.empty(); }
+	[[nodiscard]] auto isempty_odd_root() const -> bool { return odd_roots_.empty(); }
 
 	void clear()
 	{
 		tsl::robin_set<Vertex>().swap(roots_);
 		tsl::robin_set<Vertex>().swap(odd_roots_);
-		tsl::robin_map<Vertex, int>().swap(size_);
-		tsl::robin_map<Vertex, int>().swap(parity_);
+		tsl::robin_map<Vertex, uint32_t>().swap(size_);
+		tsl::robin_map<Vertex, uint32_t>().swap(parity_);
 	}
 
-	const tsl::robin_set<Vertex>& odd_roots() const& { return odd_roots_; }
-	tsl::robin_set<Vertex> odd_roots() && { return odd_roots_; }
+	[[nodiscard]] auto odd_roots() const& -> const tsl::robin_set<Vertex>&
+	{
+		return odd_roots_;
+	}
+	[[nodiscard]] auto odd_roots() && -> tsl::robin_set<Vertex> { return odd_roots_; }
 
 	void print(std::ostream& os) const
 	{

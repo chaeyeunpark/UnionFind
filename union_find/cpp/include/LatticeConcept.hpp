@@ -39,28 +39,28 @@ namespace detail
 
 template<typename T>
 concept vertex_connections_result
-	= std::convertible_to<T, std::vector<int>> || detail::std_array<T>;
+	= std::convertible_to<T, std::vector<uint32_t>> || detail::std_array<T>;
 
 /**
  * @brief Define LatticeConcept that custom Lattice classes should follow.
  * */
 template<typename T>
-concept LatticeConcept = requires(const T lattice, int vertex, Edge e)
+concept LatticeConcept = requires(const T lattice, uint32_t vertex, Edge e)
 {
 	{
 		lattice.num_vertices()
-		} -> std::convertible_to<int>;
+		} -> std::convertible_to<uint32_t>;
 	{
 		lattice.num_edges()
-		} -> std::convertible_to<int>;
+		} -> std::convertible_to<uint32_t>;
 	{
 		lattice.vertex_connections(vertex)
 		} -> vertex_connections_result;
 	{
 		lattice.vertex_connection_count(vertex)
-		} -> std::convertible_to<int>;
+		} -> std::convertible_to<uint32_t>;
 	{
 		lattice.edge_idx(e)
-		} -> std::convertible_to<int>;
+		} -> std::convertible_to<uint32_t>;
 };
 } // namespace UnionFindCPP

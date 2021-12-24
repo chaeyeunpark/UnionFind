@@ -16,69 +16,61 @@
 // along with UnionFind++.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
+#include "typedefs.hpp"
 #include "utility.hpp"
 
 #include <Eigen/Dense>
 
 namespace UnionFindCPP
 {
-inline auto is_horizontal(int L, Edge e) -> bool
+inline auto is_horizontal(uint32_t L, Edge e) -> bool
 {
 	return ((e.v - e.u) == 1) || ((e.v - e.u) == (L - 1));
 }
-inline auto is_vertical(int L, Edge e) -> bool
+inline auto is_vertical(uint32_t L, Edge e) -> bool
 {
 	return !is_horizontal(L, e);
 }
-inline auto lower(int L, Edge e) -> int // works only when vertical
+inline auto lower(uint32_t L, Edge e) -> uint32_t // works only when vertical
 {
 	if((e.v - e.u) == L) { return e.u; }
-	else
-	{
-		return e.v;
-	}
+	// else
+	return e.v;
 }
-inline auto upper(int L, Edge e) -> int
+inline auto upper(uint32_t L, Edge e) -> uint32_t
 {
 	if((e.v - e.u) == L) { return e.v; }
-	else
-	{
-		return e.u;
-	}
+	// else
+	return e.u;
 }
 
-inline auto left(int L, Edge e) -> int // works only when horizontal
+inline auto left(uint32_t /*L*/, Edge e) -> uint32_t // works only when horizontal
 {
 	if((e.v - e.u) == 1) { return e.u; }
-	else
-	{
-		return e.v;
-	}
+	// else
+	return e.v;
 }
-inline auto right(int L, Edge e) -> int // works only when horizontal
+inline auto right(uint32_t /*L*/, Edge e) -> uint32_t // works only when horizontal
 {
-	if((e.v - e.u) == 1)
-		return e.v;
-	else
-		return e.u;
+	if((e.v - e.u) == 1) { return e.v; }
+	// else
+	return e.u;
 }
 
 /**
  * This file contains functions utility functions for the Toric code.
  */
 
-auto z_error_to_syndrome_x(const int L, const Eigen::ArrayXi& z_error)
-	-> std::vector<int>;
-auto x_error_to_syndrome_z(const int L, const Eigen::ArrayXi& x_error)
-	-> std::vector<int>;
+auto z_error_to_syndrome_x(uint32_t L, const ArrayXu& z_error) -> std::vector<uint32_t>;
+auto x_error_to_syndrome_z(uint32_t L, const ArrayXu& x_error) -> std::vector<uint32_t>;
 
 /*
  * if error_type is X, the output is error locations in the dual lattice.
  * @param	error	An array of length 2*L*L where element 1 indicates the error at the
  * given index
  * */
-inline auto errors_to_syndromes(const int L, const Eigen::ArrayXi& error,
-								ErrorType error_type) -> std::vector<int>
+inline auto errors_to_syndromes(const uint32_t L, const ArrayXu& error,
+								ErrorType error_type) -> std::vector<uint32_t>
 {
 	switch(error_type)
 	{
@@ -90,17 +82,19 @@ inline auto errors_to_syndromes(const int L, const Eigen::ArrayXi& error,
 	return {};
 }
 
-constexpr auto to_vertex_index(int L, const int row, const int col) -> int
+constexpr auto to_vertex_index(uint32_t L, const uint32_t row, const uint32_t col)
+	-> uint32_t
 {
 	return (((row + L) % L)) * L + (col + L) % L;
 }
 
-inline auto vertex_to_coord(const int L, const int vidx) -> std::tuple<int, int>
+inline auto vertex_to_coord(const uint32_t L, const uint32_t vidx)
+	-> std::tuple<uint32_t, uint32_t>
 {
 	return std::make_tuple(vidx / L, vidx % L);
 }
 
-inline auto to_edge_idx(const int L, const Edge e) -> int
+inline auto to_edge_idx(const uint32_t L, const Edge e) -> uint32_t
 {
 	if(is_horizontal(L, e))
 	{
@@ -108,7 +102,7 @@ inline auto to_edge_idx(const int L, const Edge e) -> int
 		const auto [row, col] = vertex_to_coord(L, u);
 		return L * row + col + L * L;
 	}
-	else
+	// else
 	{
 		auto u = upper(L, e);
 		const auto [row, col] = vertex_to_coord(L, u);
@@ -116,22 +110,21 @@ inline auto to_edge_idx(const int L, const Edge e) -> int
 	}
 }
 
-auto decoder_edge_to_qubit_idx(const int L, Edge e, ErrorType error_type) -> int;
+auto decoder_edge_to_qubit_idx(uint32_t L, Edge e, ErrorType error_type) -> uint32_t;
 
-auto to_edge(const int L, int edge_index) -> Edge;
+auto to_edge(uint32_t L, uint32_t edge_index) -> Edge;
 
 class LatticeCubic; // forward def
 
-auto calc_syndromes(const LatticeCubic& lattice, const Eigen::ArrayXXi& errors,
-					ErrorType error_type) -> std::vector<int>;
+auto calc_syndromes(const LatticeCubic& lattice, const ArrayXXu& errors,
+					ErrorType error_type) -> std::vector<uint32_t>;
 
-void add_corrections(const int L, const std::vector<Edge>& corrections,
-					 Eigen::ArrayXi& error, ErrorType error_type);
+void add_corrections(uint32_t L, const std::vector<Edge>& corrections, ArrayXu& error,
+					 ErrorType error_type);
 
-auto logical_error(const int L, const Eigen::ArrayXi& error, ErrorType error_type)
-	-> bool;
+auto logical_error(uint32_t L, const ArrayXu& error, ErrorType error_type) -> bool;
 
-auto has_logical_error(int L, Eigen::ArrayXi& error_total,
+auto has_logical_error(uint32_t L, ArrayXu& error_total,
 					   const std::vector<Edge>& corrections, ErrorType error_type)
 	-> bool;
 } // namespace UnionFindCPP
