@@ -99,8 +99,8 @@ info = {
     "entry_points": {
     },
     "description": "C++ implemenation of UnionFind with a python binding",
-    "long_description": open("README.md").read(),
-    "long_description_content_type": "text/markdown",
+    "long_description": open("README.rst").read(),
+    "long_description_content_type": "text/x-rst",
     "provides": ["UnionFindPy"],
     "install_requires": requirements,
     "ext_modules": [CMakeExtension("_union_find_py")],
