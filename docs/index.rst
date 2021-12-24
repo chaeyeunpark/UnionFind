@@ -13,6 +13,9 @@ Main page
    install
    usage
    custom_lattice
+   development
+   python_api
+   api/library_root
 
 Indices and tables
 ==================
