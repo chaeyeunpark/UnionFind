@@ -63,8 +63,7 @@ Basic Usage
    decoder = Decoder(parity_matrix)
    decoder.decode(syndromes) # syndromes is a list of measurment outcomes of each parity operator
 
-For details, check the
-`document <https://unionfind.readthedocs.io/en/latest/?badge=latest>`__.
+For details, check the `document <https://unionfind.readthedocs.io/en/latest/?badge=latest>`_ and `examples <https://github.com/chaeyeunpark/UnionFind/tree/main/examples>`_ directory.
 
 Notes
 -----
