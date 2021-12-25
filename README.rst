@@ -38,7 +38,7 @@ Then you can compile the code using
 
 .. code-block:: bash
 
-    pip install -r requirements
+    pip install -r requirements.txt
     python3 setup.py install
 
 Note that a compiler with some C++20 support (e.g. GCC version => 10 or Clang++ version => 12) is required. For example, if you are using Ubuntu
