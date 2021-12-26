@@ -7,16 +7,16 @@ Introduction
 ------------
 
 C++ implementation of the Union-Find decoder
-`arXiv:1709:06218 <https://arxiv.org/abs/1709.06218>`__. Python
+`arXiv:1709:06218 <https://arxiv.org/abs/1709.06218>`_. Python
 interface is also implemented using
-`pybind11 <https://github.com/pybind/pybind11>`__.
+`pybind11 <https://github.com/pybind/pybind11>`_.
 
 Based on a Python implementation by Kai Meinerz.
 
 Under the LGPL lisence.
 
 This repository includes codes for
-`arXiv:2101.07285 <https://arxiv.org/abs/2101.07285>`__ which explores a
+`arXiv:2101.07285 <https://arxiv.org/abs/2101.07285>`_ which explores a
 machine learning assisted preprocessing combined with conventional
 decoders such as minimum-weight perfect matching (MWPM) and the
 Union-Find decoder.
@@ -41,7 +41,7 @@ Then you can compile the code using
     pip install -r requirements.txt
     python3 setup.py install
 
-Note that a compiler with some C++20 support (e.g. GCC version => 10 or Clang++ version => 12) is required. For example, if you are using Ubuntu
+Note that a compiler with some C++20 supports (e.g. GCC version => 10 or Clang++ version => 12) is required. For example, if you are using Ubuntu
 
 .. code-block:: bash
 
@@ -84,7 +84,7 @@ When you cite this repository, please use the following:
         year = {2020}, 
         publisher = {GitHub}, 
         journal = {GitHub repository},
-        howpublished = {:raw-latex:`\url{https://github.com/chaeyeunpark/UnionFind}`}
+        howpublished = {\url{https://github.com/chaeyeunpark/UnionFind}}
     }
 
 
