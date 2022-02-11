@@ -1,5 +1,5 @@
 import pytest
-from union_find import Decoder
+from UnionFindPy import Decoder
 import numpy as np
 from scipy.sparse import csr_matrix
 

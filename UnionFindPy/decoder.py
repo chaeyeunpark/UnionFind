@@ -39,6 +39,8 @@ class Decoder:
 
         :param syndrome_arr: for a given parity index `i`, syndrome_arr[i] must be 0 or 1. 
         """
+        if isinstance(syndrome_arr, list):
+            syndrome_arr = np.array(syndrome_arr)
         if syndrome_arr.size != self._decoder.num_vertices:
             raise ValueError("The size of syndrome_arr mismatches the size of all stabilizers")
 
