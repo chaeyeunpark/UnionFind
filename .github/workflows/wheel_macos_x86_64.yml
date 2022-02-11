@@ -20,10 +20,10 @@ env:
     pip install pybind11 ninja cmake
 
   # Testing of built wheels
-  CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
+  CIBW_TEST_REQUIRES: numpy~=1.21 pytest
 
   CIBW_TEST_COMMAND: |
-    pytest ./tests
+    pytest {project}/tests
 
   CIBW_BUILD_VERBOSITY: 1
 
