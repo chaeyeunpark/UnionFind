@@ -19,8 +19,6 @@ env:
   CIBW_BEFORE_BUILD: |
     pip install pybind11 ninja cmake
 
-  CIBW_ENVIRONMENT: CXX='clang++'
-
   # Testing of built wheels
   CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
@@ -64,6 +62,7 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+          CXX: clang++
 
       - uses: actions/upload-artifact@v2
         with:
