@@ -25,6 +25,8 @@ env:
 
   CIBW_BUILD_VERBOSITY: 1
 
+  MACOSX_DEPLOYMENT_TARGET: "10.14"
+
 jobs:
   mac-wheels-arm64:
     strategy:
