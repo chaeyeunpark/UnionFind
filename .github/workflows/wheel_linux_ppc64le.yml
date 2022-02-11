@@ -18,7 +18,7 @@ env:
   CIBW_TEST_SKIP: "*-manylinux_{ppc64le}"
 
   # Use CentOS 7 image for PPC
-  CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
+  CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux_x_y
 
 jobs:
   linux-wheels-ppc64le:
