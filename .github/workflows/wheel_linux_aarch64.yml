@@ -12,13 +12,13 @@ env:
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
-    pip install pybind11 ninja cmake && yum install -y gcc-toolset-10
+    pip install pybind11 ninja cmake && apt -y install gcc-10 g++-10
 
   # Testing of built wheels
   CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
   # Use Centos 7 wheel-builder for ARM
-  CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_x_y
+  CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_24
 
 jobs:
   linux-wheels-aarch64:

@@ -12,13 +12,13 @@ env:
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
-    pip install pybind11 ninja cmake && yum install -y gcc-toolset-10
+    pip install pybind11 ninja cmake && apt -y install gcc-10 g++-10
 
   # Skip PPC tests due to lack of numpy/scipy wheel support
   CIBW_TEST_SKIP: "*-manylinux_{ppc64le}"
 
   # Use CentOS 7 image for PPC
-  CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux_x_y
+  CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux_2_24
 
 jobs:
   linux-wheels-ppc64le:
