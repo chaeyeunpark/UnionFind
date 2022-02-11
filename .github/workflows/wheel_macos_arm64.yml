@@ -12,7 +12,7 @@ env:
   # MacOS specific build settings
   CIBW_BEFORE_ALL_MACOS: |
     brew uninstall --force oclint
-    brew install --with-toolchain llvm
+    #brew install --with-toolchain llvm
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
