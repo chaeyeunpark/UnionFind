@@ -63,7 +63,7 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ARCHS_MACOS: ${{ matrix.arch }}
-          CXX: "$(brew --prefix llvm)/bin/clang++"
+          CXX: "/usr/local/opt/llvm/bin/clang++"
 
       - uses: actions/upload-artifact@v2
         with:
