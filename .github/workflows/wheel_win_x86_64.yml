@@ -48,6 +48,8 @@ jobs:
         uses: tj-actions/branch-names@v5
 
       - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
 
       - uses: actions/setup-python@v2
         name: Install Python
