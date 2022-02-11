@@ -1,43 +1,35 @@
-name: Wheel::MacOS::ARM
+name: Wheel::Linux::x86_64
 on:
+  release:
   push:
     branches:
-      - main
+      - master
   pull_request:
-  release:
 
 env:
   CIBW_BUILD: 'cp37-* cp38-* cp39-* cp310-*'
-
-  # MacOS specific build settings
-  CIBW_BEFORE_ALL_MACOS: |
-    brew uninstall --force oclint
-    brew update
-    brew install llvm
+  CIBW_SKIP: "*-musllinux*"
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
-    pip install pybind11 ninja cmake
-    echo "$(brew --prefix llvm)/bin"
+    pip install pybind11 ninja cmake && yum install -y gcc-toolset-10
 
   # Testing of built wheels
   CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
   CIBW_TEST_COMMAND: |
-    pytest ./tests
+    pl-device-test --device=lightning.qubit --skip-ops -x --tb=short --no-flaky-report
 
-  CIBW_BUILD_VERBOSITY: 1
-
-  MACOSX_DEPLOYMENT_TARGET: "10.14"
+  CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
 jobs:
-  mac-wheels-arm64:
+  linux-wheels-x86-64:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11]
-        arch: [arm64]
-    name: macos-latest::arm64
+        os: [ubuntu-latest]
+        arch: [x86_64]
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -47,8 +39,6 @@ jobs:
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
 
       - uses: actions/setup-python@v2
         name: Install Python
@@ -59,27 +49,31 @@ jobs:
         run: python -m pip install cibuildwheel==2.3.0
 
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
-          CXX: "/usr/local/opt/llvm/bin/clang++"
+          CIBW_ARCHS_LINUX: ${{matrix.arch}}
+          CXX: "g++-10"
+
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: rc_build
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: '.*[0-9]+.[0-9]+.[0-9]+[-]?rc[0-9]+'
 
       - uses: actions/upload-artifact@v2
-        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
         with:
           name: ${{ runner.os }}-wheels.zip
           path: ./wheelhouse/*.whl
 
-
   upload-pypi:
-    needs: mac-wheels-arm64
+    needs: linux-wheels-x86-64
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: macOS-wheels.zip
+          name: Linux-wheels.zip
           path: dist
 
       - name: Upload wheels to PyPI

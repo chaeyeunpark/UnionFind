@@ -1,43 +1,33 @@
-name: Wheel::MacOS::ARM
+name: Wheel::Linux::PowerPC
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - master
   release:
+    types: [published]
 
 env:
   CIBW_BUILD: 'cp37-* cp38-* cp39-* cp310-*'
-
-  # MacOS specific build settings
-  CIBW_BEFORE_ALL_MACOS: |
-    brew uninstall --force oclint
-    brew update
-    brew install llvm
+  CIBW_SKIP: "*-musllinux*"
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
-    pip install pybind11 ninja cmake
-    echo "$(brew --prefix llvm)/bin"
+    pip install pybind11 ninja cmake && yum install -y gcc-toolset-10
 
-  # Testing of built wheels
-  CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
+  # Skip PPC tests due to lack of numpy/scipy wheel support
+  CIBW_TEST_SKIP: "*-manylinux_{ppc64le}"
 
-  CIBW_TEST_COMMAND: |
-    pytest ./tests
-
-  CIBW_BUILD_VERBOSITY: 1
-
-  MACOSX_DEPLOYMENT_TARGET: "10.14"
+  # Use CentOS 7 image for PPC
+  CIBW_MANYLINUX_PPC64LE_IMAGE: manylinux2014
 
 jobs:
-  mac-wheels-arm64:
+  linux-wheels-ppc64le:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11]
-        arch: [arm64]
-    name: macos-latest::arm64
+        os: [ubuntu-latest]
+        arch: [ppc64le]
+    name: ubuntu-latest::ppc64le
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -47,8 +37,9 @@ jobs:
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
+
+      - uses: docker/setup-qemu-action@v1
+        name: Set up QEMU
 
       - uses: actions/setup-python@v2
         name: Install Python
@@ -59,27 +50,25 @@ jobs:
         run: python -m pip install cibuildwheel==2.3.0
 
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
-          CXX: "/usr/local/opt/llvm/bin/clang++"
+          CIBW_ARCHS_LINUX: ${{matrix.arch}}
+          CXX: "g++-10"
 
       - uses: actions/upload-artifact@v2
-        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
         with:
           name: ${{ runner.os }}-wheels.zip
           path: ./wheelhouse/*.whl
 
-
   upload-pypi:
-    needs: mac-wheels-arm64
+    needs: linux-wheels-ppc64le
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: macOS-wheels.zip
+          name: Linux-wheels.zip
           path: dist
 
       - name: Upload wheels to PyPI
