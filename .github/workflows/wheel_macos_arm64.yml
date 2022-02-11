@@ -12,10 +12,13 @@ env:
   # MacOS specific build settings
   CIBW_BEFORE_ALL_MACOS: |
     brew uninstall --force oclint
+    brew install --with-toolchain llvm
 
   # Python build settings
   CIBW_BEFORE_BUILD: |
     pip install pybind11 ninja cmake
+
+  # CIBW_ENVIRONMENT: CXX='clang++'
 
   # Testing of built wheels
   CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
@@ -44,6 +47,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v2
+        submodules: 'recursive'
 
       - uses: actions/setup-python@v2
         name: Install Python
