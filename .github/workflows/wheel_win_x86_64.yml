@@ -22,7 +22,7 @@ env:
     python -c "import sys; print(sys.path)"
 
   CIBW_TEST_COMMAND: |
-    pytest {project}/tests
+    python {project}/tests/test_decoder.py
 
   DISTUTILS_USE_SDK: 1
 

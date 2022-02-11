@@ -23,7 +23,7 @@ env:
   CIBW_TEST_REQUIRES: numpy~=1.21 pytest
 
   CIBW_TEST_COMMAND: |
-    pytest {project}/tests
+    python {project}/tests/test_decoder.py
 
   CIBW_BUILD_VERBOSITY: 1
 
