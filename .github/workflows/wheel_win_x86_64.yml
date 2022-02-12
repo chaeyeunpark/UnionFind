@@ -1,0 +1,94 @@
+name: Wheel::Windows::x86_64
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+
+env:
+  CIBW_BUILD: 'cp37-* cp38-* cp39-* cp310-*'
+
+  CIBW_ARCHS_WINDOWS: "AMD64"
+
+  # Python build settings
+  CIBW_BEFORE_BUILD: |
+    pip install pybind11 ninja cmake
+
+  # Testing of built wheels
+  CIBW_TEST_REQUIRES: numpy~=1.21 pytest scipy
+
+  CIBW_BEFORE_TEST: |
+    python -c "import sys; print(sys.path)"
+
+  CIBW_TEST_COMMAND: |
+    python {project}\tests\test_decoder.py
+
+  DISTUTILS_USE_SDK: 1
+
+  MSSdk: 1
+
+jobs:
+  win-wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.4.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Get git branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v5
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.7'
+
+      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.3.1
+
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: rc_build
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: '.*[0-9]+.[0-9]+.[0-9]+[-]?rc[0-9]+'
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        with:
+          name: ${{ runner.os }}-wheels.zip
+          path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: win-wheels
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: Windows-wheels.zip
+          path: dist
+
+      - name: Upload wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
