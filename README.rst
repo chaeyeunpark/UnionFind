@@ -84,6 +84,7 @@ When you cite this repository, please use the following:
         year = {2020}, 
         publisher = {GitHub}, 
         journal = {GitHub repository},
+	doi = {10.5281/zenodo.10044828},
         howpublished = {\url{https://github.com/chaeyeunpark/UnionFind}}
     }
 
